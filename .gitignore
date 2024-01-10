@@ -396,3 +396,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+lindsey-website/backend/mvnw
+lindsey-website/backend/mvnw.cmd
