@@ -12,6 +12,6 @@ RETURNS TABLE (
     updated_at TIMESTAMP
 ) AS $$
 BEGIN
-    RETURN QUERY SELECT * FROM artworks WHERE artworks.medium = p_medium;
+    RETURN QUERY SELECT * FROM ARTWORKS WHERE ARTWORKS.medium = p_medium;
 END;
 $$ LANGUAGE plpgsql;
