@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/lindsey-website",
+            "outputPath": "../backend/src/main/resources/static",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -97,5 +97,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "deeff8d2-6866-4f46-84f1-f8edda5863f3"
   }
 }

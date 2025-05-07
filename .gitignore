@@ -398,3 +398,7 @@ FodyWeavers.xsd
 *.sln.iml
 lindsey-website/backend/mvnw
 lindsey-website/backend/mvnw.cmd
+lindsey-website/.env
+lindsey-website/.vscode/settings.json
+lindsey-website/.env.prod
+lindsey-website/.env.dev

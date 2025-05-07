@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS ARTWORKS (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(255),
+    medium VARCHAR(100),
+    year INTEGER,
+    for_sale BOOLEAN DEFAULT FALSE,
+    price NUMERIC(10,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
