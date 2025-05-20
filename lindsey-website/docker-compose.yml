@@ -4,16 +4,16 @@ services:
   lindsey-website:
     build: .
     ports:
-      - "${APP_PORT:-8080}:8080"
+      - "${APP_PORT}:8080"
     depends_on:
       - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-lindseydb}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-lindsey}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-dev-password}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      SPRING_PROFILES_ACTIVE: ${ENVIRONMENT:-dev}
+      SPRING_REDIS_PORT: ${REDIS_PORT}
+      SPRING_PROFILES_ACTIVE: ${ENVIRONMENT}
 
   postgres:
     image: postgres:15
@@ -24,12 +24,12 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT}:5432"
 
   redis:
     image: redis:7
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT}:6379"
 
 volumes:
   postgres-data:
