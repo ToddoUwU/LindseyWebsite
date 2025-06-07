@@ -3,6 +3,7 @@ package com.lindseyayresart.lindseywebsite.Model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -13,25 +14,52 @@ public class Artwork {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @Column(name = "title", nullable = false, unique = true)
     private String title;
     
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "art_description", columnDefinition = "TEXT")
+    private String artDescription;
     
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "dimensions")
+    private String dimensions;
     
-    private String medium;
-    private Integer year;
+    @Column(name = "small_image_url")
+    private String smallImageUrl;
+    
+    @Column(name = "large_image_url")
+    private String largeImageUrl;
+    
+    @Column(name = "link_to_print")
+    private String linkToPrint;
+    
+    @Column(name = "date_produced")
+    private LocalDate dateProduced;
+    
+    @Column(name = "original_price")
+    private BigDecimal originalPrice;
     
     @Column(name = "for_sale")
     private Boolean forSale;
     
-    private BigDecimal price;
+    @Column(name = "location")
+    private String location;
+    
+    @Column(name = "medium")
+    private String medium;
+    
+    @Column(name = "categories", columnDefinition = "TEXT")
+    private String categories;
+    
+    @Column(name = "is_featured")
+    private Boolean isFeatured;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    // Hash value used for Redis cache invalidation verification
+    @Column(name = "content_hash")
+    private String contentHash;
 }

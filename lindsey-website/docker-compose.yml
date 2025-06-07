@@ -7,12 +7,17 @@ services:
       - "${APP_PORT}:8080"
     depends_on:
       - postgres
+      - redis
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: ${REDIS_PORT}
+      SPRING_CACHE_TYPE: ${SPRING_CACHE_TYPE}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT}
+      SPRING_JPA_OPEN_IN_VIEW: ${SPRING_JPA_OPEN_IN_VIEW}
       SPRING_PROFILES_ACTIVE: ${ENVIRONMENT}
 
   postgres:
@@ -28,8 +33,13 @@ services:
 
   redis:
     image: redis:7
+    command: redis-server
     ports:
       - "${REDIS_PORT}:6379"
+    volumes:
+      - redis-data:/data
+    restart: always
 
 volumes:
   postgres-data:
+  redis-data:

@@ -44,7 +44,7 @@ public class DatabaseInitializer {
         executeScript("sql/stored_procedures/ArtworkManagement.sql");
         
         // Finally triggers
-        //executeScript("sql/triggers/update_artwork_timestamp.sql");
+        executeScript("sql/triggers/update_artwork_timestamp.sql");
         
         logger.info("Database initialization completed");
     }
