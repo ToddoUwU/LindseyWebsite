@@ -16,9 +16,7 @@ import com.lindseyayresart.lindseywebsite.Model.Artwork;
 import com.lindseyayresart.lindseywebsite.Repository.ArtworkRepository;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.StoredProcedureQuery;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -57,7 +55,7 @@ public class ArtworkService {
     }
     
     /**
-     * Get artwork by title using stored procedure (from cache if available)
+     * Get artwork by title using function (from cache if available)
      */
     @SuppressWarnings("unchecked")
     public Optional<Artwork> getArtworkByTitle(String title) {
@@ -75,13 +73,11 @@ public class ArtworkService {
             return Optional.of(cached);
         }
         
-        // Use stored procedure if not in cache
-        StoredProcedureQuery query = entityManager
-            .createStoredProcedureQuery("get_artwork_by_title", Artwork.class)
-            .registerStoredProcedureParameter("p_title", String.class, ParameterMode.IN)
-            .setParameter("p_title", title);
-        
-        List<Artwork> results = query.getResultList();
+        // Use native query with the function
+        List<Artwork> results = entityManager
+            .createNativeQuery("SELECT * FROM get_artwork_by_title(:title)", Artwork.class)
+            .setParameter("title", title)
+            .getResultList();
         
         if (!results.isEmpty()) {
             Artwork artwork = results.get(0);
@@ -99,7 +95,7 @@ public class ArtworkService {
     }
     
     /**
-     * Get artworks by medium using stored procedure (from cache if available)
+     * Get artworks by medium using function (from cache if available)
      */
     @SuppressWarnings("unchecked")
     public List<Artwork> getArtworksByMedium(String medium) {
@@ -110,12 +106,10 @@ public class ArtworkService {
             return cached;
         }
         
-        StoredProcedureQuery query = entityManager
-            .createStoredProcedureQuery("get_artworks_by_medium", Artwork.class)
-            .registerStoredProcedureParameter("p_medium", String.class, ParameterMode.IN)
-            .setParameter("p_medium", medium);
-        
-        List<Artwork> results = query.getResultList();
+        List<Artwork> results = entityManager
+            .createNativeQuery("SELECT * FROM get_artworks_by_medium(:medium)", Artwork.class)
+            .setParameter("medium", medium)
+            .getResultList();
         
         // Cache results
         redisTemplate.opsForValue().set(cacheKey, results);
@@ -124,7 +118,7 @@ public class ArtworkService {
     }
     
     /**
-     * Get all artworks using stored procedure (from cache if available)
+     * Get all artworks using function (from cache if available)
      */
     @SuppressWarnings("unchecked")
     public List<Artwork> getAllArtworks() {
@@ -133,20 +127,19 @@ public class ArtworkService {
         if (cached != null) {
             return cached;
         }
-        
-        StoredProcedureQuery query = entityManager
-            .createStoredProcedureQuery("get_all_artworks", Artwork.class);
-        
-        List<Artwork> results = query.getResultList();
-        
+
+        List<Artwork> results = entityManager
+            .createNativeQuery("SELECT * FROM get_all_artworks()", Artwork.class)
+            .getResultList();
+
         // Cache results
         redisTemplate.opsForValue().set(ARTWORK_LIST_KEY, results);
-        
+
         return results;
     }
     
     /**
-     * Get featured artworks using stored procedure (from cache if available)
+     * Get featured artworks using function (from cache if available)
      */
     @SuppressWarnings("unchecked")
     public List<Artwork> getFeaturedArtworks() {
@@ -157,10 +150,9 @@ public class ArtworkService {
             return cached;
         }
         
-        StoredProcedureQuery query = entityManager
-            .createStoredProcedureQuery("get_featured_artworks", Artwork.class);
-        
-        List<Artwork> results = query.getResultList();
+        List<Artwork> results = entityManager
+            .createNativeQuery("SELECT * FROM get_featured_artworks()", Artwork.class)
+            .getResultList();
         
         // Cache results
         redisTemplate.opsForValue().set(cacheKey, results);
@@ -169,7 +161,7 @@ public class ArtworkService {
     }
     
     /**
-     * Get artworks by category using stored procedure (from cache if available)
+     * Get artworks by category using function (from cache if available)
      */
     @SuppressWarnings("unchecked")
     public List<Artwork> getArtworksByCategory(String category) {
@@ -180,12 +172,10 @@ public class ArtworkService {
             return cached;
         }
         
-        StoredProcedureQuery query = entityManager
-            .createStoredProcedureQuery("get_artworks_by_category", Artwork.class)
-            .registerStoredProcedureParameter("p_category", String.class, ParameterMode.IN)
-            .setParameter("p_category", category);
-        
-        List<Artwork> results = query.getResultList();
+        List<Artwork> results = entityManager
+            .createNativeQuery("SELECT * FROM get_artworks_by_category(:category)", Artwork.class)
+            .setParameter("category", category)
+            .getResultList();
         
         // Cache results
         redisTemplate.opsForValue().set(cacheKey, results);
@@ -229,18 +219,16 @@ public class ArtworkService {
     }
     
     /**
-     * Update artwork hash in database using stored procedure
+     * Update artwork hash in database using function 
      */
     @Transactional
     public void updateArtworkHash(Long id, String hash) {
-        StoredProcedureQuery query = entityManager
-            .createStoredProcedureQuery("update_artwork_hash")
-            .registerStoredProcedureParameter("p_id", Long.class, ParameterMode.IN)
-            .registerStoredProcedureParameter("p_hash", String.class, ParameterMode.IN)
-            .setParameter("p_id", id)
-            .setParameter("p_hash", hash);
-        
-        query.execute();
+        // Use native query instead of stored procedure query
+        entityManager
+            .createNativeQuery("SELECT update_artwork_hash(:id, :hash)")
+            .setParameter("id", id)
+            .setParameter("hash", hash)
+            .getSingleResult();
     }
     
     /**

@@ -31,14 +31,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Get all artworks - potentially with pagination
-CREATE OR REPLACE FUNCTION get_all_artworks(p_limit INTEGER DEFAULT NULL, p_offset INTEGER DEFAULT 0)
+CREATE OR REPLACE FUNCTION get_all_artworks()
 RETURNS SETOF ARTWORKS AS $$
 BEGIN
-    IF p_limit IS NULL THEN
-        RETURN QUERY SELECT * FROM ARTWORKS ORDER BY date_produced DESC OFFSET p_offset;
-    ELSE
-        RETURN QUERY SELECT * FROM ARTWORKS ORDER BY date_produced DESC LIMIT p_limit OFFSET p_offset;
-    END IF;
+   RETURN QUERY SELECT * FROM ARTWORKS ORDER BY date_produced DESC;
+
 END;
 $$ LANGUAGE plpgsql;
 
@@ -46,7 +43,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_artwork_hash(p_id BIGINT, p_hash VARCHAR)
 RETURNS VOID AS $$
 BEGIN
-    UPDATE ARTWORKS SET content_hash = p_hash, updated_at = CURRENT_TIMESTAMP 
+    UPDATE ARTWORKS
+    SET content_hash = p_hash,
+        updated_at = CURRENT_TIMESTAMP
     WHERE id = p_id;
 END;
 $$ LANGUAGE plpgsql;

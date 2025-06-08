@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   lindsey-website:
-    build: .
+    build: 
+      context: .
+      args:
+        - BUILD_TIMESTAMP=${BUILD_TIMESTAMP:-$(date +%s)}
     ports:
       - "${APP_PORT}:8080"
     depends_on:
@@ -19,6 +22,7 @@ services:
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT}
       SPRING_JPA_OPEN_IN_VIEW: ${SPRING_JPA_OPEN_IN_VIEW}
       SPRING_PROFILES_ACTIVE: ${ENVIRONMENT}
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
 
   postgres:
     image: postgres:15

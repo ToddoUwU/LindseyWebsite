@@ -160,18 +160,17 @@ def parse_artwork_file(file_path):
     with open(file_path, 'r') as file:
         for line in file:
             # Remove leading/trailing whitespace from the line
-            line = line.strip()
+            line = line.rstrip()  # Keep leading tabs/spaces for indentation detection
             
             # Skip empty lines
-            if not line:
+            if not line.strip():  # Use strip() here to check if line is empty after removing all whitespace
                 continue
             
             # Check if this is a new field header
-            # A field header is a line that:
-            # 1. Does not start with a tab (not indented)
-            # 2. Does not contain a dash surrounded by spaces (to avoid mistaking "Categories - List of..." as a field)
-            if not line.startswith('\t') and not re.match(r'.*\s-\s.*', line):
-                # Check if the line starts with a word (field name)
+            # A field header is typically at the beginning of the line (not indented)
+            if not line.startswith('\t') and not line.startswith('    '):  # Check for tab or 4 spaces
+                # Try to match field names - they're usually a single word at the start of the line
+                # But sometimes have explanatory text after, like "OriginalPrice - Price of..."
                 field_match = re.match(r'^([A-Za-z]+)($|\s.*)', line)
                 if field_match:
                     # If we were processing another field, save its content before moving to the new field
@@ -181,26 +180,34 @@ def parse_artwork_file(file_path):
                         # Reset the content accumulator for the new field
                         field_content = []
                     
-                    # Set the new current field
+                    # Set the new current field - just take the word part, not any explanatory text
                     current_field = field_match.group(1)
-                    # If there's content on the same line as the field name, add it to the content
-                    if field_match.group(2):
-                        field_content.append(field_match.group(2).strip())
-                    # Skip to next line
-                    continue
+                    
+                    # Debug print to see what fields are being detected
+                    print(f"Found field: {current_field}")
+                    
+                    # If there's content on the same line, it goes into the content (skip explanatory parts)
+                    remaining = field_match.group(2).strip()
+                    # Skip explanatory text (like "- Price of the original artwork not print")
+                    if remaining and not remaining.startswith('-'):
+                        field_content.append(remaining)
+                    continue  # Move to next line
             
-            # If not a field header, add the line to the current field's content
-            if current_field:
-                field_content.append(line)
+            # If line is indented and we're in a field, add it to the current field's content
+            elif current_field and (line.startswith('\t') or line.startswith('    ')):
+                # Add the line without the indentation
+                field_content.append(line.strip())
     
     # Save the last field's content
     if current_field:
         artwork[current_field.lower()] = '\n'.join(field_content).strip()
     
+    print("Raw parsed data:", artwork)  # Debug print to see what was parsed
+    
     # Map the template fields to database column names and handle default values
     db_artwork = {
-        # Set title, use 'Untitled' as default, and strip whitespace
-        'title': artwork.get('title', 'Untitled').strip(),
+        # Set title, get from artwork or None (will be checked later)
+        'title': artwork.get('title', '').strip() or None,
         # Set art description, use empty string as default, and strip whitespace
         'art_description': artwork.get('artdescription', '').strip(),
         # Set dimensions, use empty string as default, and strip whitespace
@@ -310,89 +317,66 @@ def upsert_artwork(conn, artwork):
     """
     Insert a new artwork or update an existing one in the database.
     
-    This function checks if an artwork with the given title already exists
-    in the database. If it does, the function updates the existing record;
-    otherwise, it inserts a new record.
-    
-    Args:
-        conn (psycopg2.connection): Database connection
-        artwork (dict): Dictionary containing artwork data
-        
-    Returns:
-        None
+    This implements behavior similar to Oracle's MERGE, using PostgreSQL's
+    upsert capabilities to handle cases where the script runs multiple times.
     """
     # Create a cursor for executing SQL commands
     cursor = conn.cursor()
     
     try:
-        # Check if an artwork with this title already exists in the database
-        cursor.execute("SELECT id FROM artworks WHERE title = %s", (artwork['title'],))
-        # Fetch the result of the query
-        existing = cursor.fetchone()
-        
         # Calculate a content hash for detecting changes
         content_hash = calculate_content_hash(artwork)
         # Add the content hash to the artwork data
         artwork['content_hash'] = content_hash
         
-        # If an artwork with this title already exists
+        # First check if we need to actually update based on content hash
+        cursor.execute("SELECT id, content_hash FROM artworks WHERE title = %s", (artwork['title'],))
+        existing = cursor.fetchone()
+        
         if existing:
-            # Get the ID of the existing artwork
-            artwork_id = existing[0]
+            # Get the ID and content hash of the existing artwork
+            artwork_id, existing_hash = existing
             
-            # Prepare for the UPDATE query
-            placeholders = []  # Will hold the "column = %s" parts
-            values = []        # Will hold the values to substitute for the %s placeholders
+            # If content hash matches, skip the update (nothing changed)
+            if existing_hash == content_hash:
+                print(f"Skipping update for '{artwork['title']}' - no changes detected")
+                return
+                
+            # Update existing artwork
+            placeholders = []
+            values = []
             
-            # For each field in the artwork dictionary
             for key in artwork:
-                # Add a placeholder for this field
                 placeholders.append(f"{key} = %s")
-                # Add the corresponding value
                 values.append(artwork[key])
             
-            # Add the artwork ID to the values for the WHERE clause
             values.append(artwork_id)
-            
-            # Construct the full UPDATE query
             query = f"UPDATE artworks SET {', '.join(placeholders)} WHERE id = %s"
             
-            # If this is a dry run, just print what would happen
             if args.dry_run:
                 print(f"Would update: {artwork['title']}")
             else:
-                # Execute the update query with the values
                 cursor.execute(query, values)
                 print(f"Updated: {artwork['title']} (ID: {artwork_id})")
         else:
-            # If this is a new artwork, prepare for an INSERT query
-            # Get the column names from the artwork dictionary
+            # Insert new artwork
             columns = list(artwork.keys())
-            # Create a list of %s placeholders of the same length
             placeholders = ['%s'] * len(columns)
-            # Get the values in the same order as the columns
             values = [artwork[key] for key in columns]
             
-            # Construct the full INSERT query, which returns the new ID
             query = f"INSERT INTO artworks ({', '.join(columns)}) VALUES ({', '.join(placeholders)}) RETURNING id"
             
-            # If this is a dry run, just print what would happen
             if args.dry_run:
                 print(f"Would insert: {artwork['title']}")
             else:
-                # Execute the insert query with the values
                 cursor.execute(query, values)
-                # Get the ID of the newly inserted row
                 artwork_id = cursor.fetchone()[0]
                 print(f"Inserted: {artwork['title']} (ID: {artwork_id})")
     
     except Exception as e:
-        # If any error occurs during database operations
         print(f"Error processing artwork '{artwork.get('title', 'Unknown')}': {e}")
-        # Re-raise the exception to be handled by the calling function
         raise
     finally:
-        # Always close the cursor to release resources
         cursor.close()
 
 def main():
@@ -420,6 +404,7 @@ def main():
     art_dirs = [d for d in images_path.iterdir() if d.is_dir() and re.match(r'\d{2}-.*', d.name)]
     # Sort the directories so they're processed in order
     art_dirs.sort()
+    print(art_dirs)
     
     # Initialize counter for tracking how many artworks are imported
     import_count = 0
@@ -433,9 +418,17 @@ def main():
             if "Template" in art_dir.name:
                 continue
             
-            # Get the first two characters of the directory name (the number)
-            dir_number = art_dir.name[:2]
+            # Extract all digits before the first dash to handle directories like "100-Artwork"
+            dir_number_match = re.match(r'^(\d+)-', art_dir.name)
+            if not dir_number_match:
+                print(f"Skipping directory with invalid format: {art_dir}")
+                continue
+
+            # Get the directory number from the regex match
+            dir_number = dir_number_match.group(1)
+                
             # Find text files in the directory that start with the same number
+            # This will match "01-File.txt" for directory "01-Artwork" or "100-File.txt" for "100-Artwork"
             desc_files = list(art_dir.glob(f"{dir_number}*.txt"))
             
             # If no matching text files are found, skip this directory
@@ -446,7 +439,13 @@ def main():
             try:
                 # Parse the first matching text file to extract artwork data
                 artwork = parse_artwork_file(desc_files[0])
+                print("Parsed artwork:", artwork)
                 
+                # Skip artworks with no title - titles are required and must be unique
+                if not artwork['title']:
+                    print(f"Skipping artwork in {art_dir} - no title specified")
+                    continue
+                    
                 # Find images for this artwork based on its title
                 small_image, large_image = find_images(art_dir, artwork['title'])
                 # Add the image URLs to the artwork data
