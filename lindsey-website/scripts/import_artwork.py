@@ -42,6 +42,7 @@ from datetime import datetime  # Date and time functionality
 from pathlib import Path       # Object-oriented filesystem paths
 # Import dotenv to load environment variables from .env files
 from dotenv import load_dotenv # Load environment variables from .env files
+from test_dir_img_txt_title_match import get_valid_art_directories
 
 # Set up command line argument parsing
 # Create an ArgumentParser object with a description of what the script does
@@ -55,6 +56,9 @@ parser.add_argument('--image-path', default='/home/toddday/Documents/LinbinbinWe
 # Define the --dry-run flag, which takes no value but indicates a test run when present
 parser.add_argument('--dry-run', action='store_true', 
                     help='Show what would be imported without making changes')
+# Add this to your argument definitions
+parser.add_argument('--verbose', action='store_true', 
+                    help='Show detailed validation information')
 # Parse the command line arguments and store them in args
 args = parser.parse_args()
 
@@ -400,12 +404,12 @@ def main():
         print(f"Error: Images directory {args.image_path} does not exist or is not a directory.")
         return
     
-    # Find all directories that start with two digits followed by a hyphen
-    art_dirs = [d for d in images_path.iterdir() if d.is_dir() and re.match(r'\d{2}-.*', d.name)]
-    # Sort the directories so they're processed in order
-    art_dirs.sort()
-    print(art_dirs)
+    valid_art_info, invalid_art_info, debug_info = get_valid_art_directories(images_path, verbose=args.verbose if hasattr(args, 'verbose') else False)
     
+    valid_art_info.sort()
+    if verbose:
+        print(valid_art_info)
+
     # Initialize counter for tracking how many artworks are imported
     import_count = 0
     # Disable autocommit to wrap all database operations in a transaction
@@ -413,38 +417,14 @@ def main():
     
     try:
         # Process each artwork directory
-        for art_dir in art_dirs:
-            # Skip any directory with "Template" in the name
-            if "Template" in art_dir.name:
-                continue
-            
-            # Extract all digits before the first dash to handle directories like "100-Artwork"
-            dir_number_match = re.match(r'^(\d+)-', art_dir.name)
-            if not dir_number_match:
-                print(f"Skipping directory with invalid format: {art_dir}")
-                continue
-
-            # Get the directory number from the regex match
-            dir_number = dir_number_match.group(1)
-                
-            # Find text files in the directory that start with the same number
-            # This will match "01-File.txt" for directory "01-Artwork" or "100-File.txt" for "100-Artwork"
-            desc_files = list(art_dir.glob(f"{dir_number}*.txt"))
-            
-            # If no matching text files are found, skip this directory
-            if not desc_files:
-                print(f"No description file found in {art_dir}")
-                continue
+        for art_dir in valid_art_info:
+            description_file = art_dir / f"{art_dir.name}.txt"
             
             try:
                 # Parse the first matching text file to extract artwork data
-                artwork = parse_artwork_file(desc_files[0])
+                artwork = parse_artwork_file(description_file)
                 print("Parsed artwork:", artwork)
-                
-                # Skip artworks with no title - titles are required and must be unique
-                if not artwork['title']:
-                    print(f"Skipping artwork in {art_dir} - no title specified")
-                    continue
+    
                     
                 # Find images for this artwork based on its title
                 small_image, large_image = find_images(art_dir, artwork['title'])
