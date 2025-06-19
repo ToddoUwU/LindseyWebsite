@@ -1,0 +1,30 @@
+
+Title
+	Vitamin D
+
+ArtDescription 
+	Watercolor self-portrait study of the artist soaking up the warmth of the sun during one of the first days of Spring
+
+Dimensions
+	9"x12"
+
+Medium
+	Watercolor
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2020
+
+Location
+	San Antonio, Texas
+
+OriginalPrice - Price of the original artwork not print
+	$100
+
+Categories - List of all categories the art falls under
+	watercolor, portrait, self-portrait, women, realism, light, study

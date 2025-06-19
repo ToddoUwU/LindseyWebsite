@@ -1,0 +1,30 @@
+
+Title
+	Lil Yamper
+
+ArtDescription 
+	Humorous ink drawing illustration pet portrait of Lil Yamper
+
+Medium
+	ink on Bristol paper
+
+Dimensions
+	5"x7"
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2020
+
+Location
+	San Antonio, Texas
+
+OriginalPrice - Price of the original artwork not print
+	$50
+
+Categories - List of all categories the art falls under
+	pets, animals, dogs, humour, portrait, illustration, ink, drawing, commissions

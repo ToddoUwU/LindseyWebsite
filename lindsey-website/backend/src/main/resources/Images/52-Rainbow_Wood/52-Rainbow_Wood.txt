@@ -1,0 +1,30 @@
+
+Title
+	Rainbow Wood
+
+ArtDescription 
+	Small acrylic painting of abstract wood grain patterns in rainbow colors
+
+Dimensions
+	5"x7"
+
+Medium
+	Acrylic on canvas
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2023
+
+Location
+	San Antonio, Texas
+
+OriginalPrice - Price of the original artwork not print
+	$75
+
+Categories - List of all categories the art falls under
+	acrylic, painting, paint pouring, patterns, abstract

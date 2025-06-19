@@ -1,0 +1,27 @@
+
+Title
+	Pure Imagination
+
+ArtDescription 
+	Pixelated portrait acrylic paint study of Gene Wilder in his famous role of Willy Wonka from the movie based on Roald Dahl's Charlie and the Chocolate Factory. 
+
+Dimensions
+	11"x14"
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$150
+
+Categories - List of all categories the art falls under
+	Portrait, illustration, painting, acrylic, study, commercial, fan art, children, fantasy

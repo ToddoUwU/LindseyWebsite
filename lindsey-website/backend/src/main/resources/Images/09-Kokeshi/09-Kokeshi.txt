@@ -1,0 +1,30 @@
+
+Title
+	Kokeshi
+
+ArtDescription 
+	Still life pastel drawing symbolizing birth, life, and death done with just white and black pastel on a scarlet red background.
+
+Dimensions
+	13"x19"
+
+Medium
+	Pastel on colored drawing paper
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$200
+
+Categories - List of all categories the art falls under 
+	Still life, drawing, pastel, life, death, nature

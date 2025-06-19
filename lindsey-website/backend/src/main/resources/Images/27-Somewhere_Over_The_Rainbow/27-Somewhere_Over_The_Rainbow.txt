@@ -1,0 +1,30 @@
+
+Title
+	Somewhere Over the Rainbow
+
+ArtDescription 
+	Watercolor portrait of a happy little girl hiding in a field of poppies, an ode to The Wizard of Oz
+
+Dimensions
+	9"x12"
+
+Medium
+	watercolor
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2014
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$150
+
+Categories - List of all categories the art falls under
+	portrait, landscape, watercolor, children, painting, flowers, fantasy, illustration

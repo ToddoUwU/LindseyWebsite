@@ -1,0 +1,30 @@
+
+Title
+	Ghostwriter
+
+ArtDescription 	
+	Pet portrait of the corgi/German shepherd mix dog Ghostwriter wearing his fancy bathrobe.
+
+Dimensions
+	11"x14"
+
+Medium
+	watercolor
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2020
+
+Location
+	San Antonio, Texas
+
+OriginalPrice - Price of the original artwork not print
+	$200
+
+Categories - List of all categories the art falls under
+	Realism, watercolor, pets, animals, dogs, portraits, illustration, commission 

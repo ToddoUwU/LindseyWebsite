@@ -1,0 +1,30 @@
+
+Title
+	Lavender Lady	
+
+ArtDescription 
+	Small watercolor portrait of a woman with magical purple hair.
+
+Dimensions
+	6"x8"
+
+Medium
+	Watercolor
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$50
+
+Categories - List of all categories the art falls under
+	portrait, watercolor, painting, woman, fantasy

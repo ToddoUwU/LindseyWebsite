@@ -1,0 +1,30 @@
+
+Title
+	Time Travel
+
+ArtDescription 
+	Small abstract acrylic painting featuring vibrating swirls of colors and patterns
+
+Dimensions
+	5"x7"
+
+Medium
+	acrylic on canvas
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2023
+
+Location
+	San Antonio
+
+OriginalPrice - Price of the original artwork not print
+	$75
+
+Categories - List of all categories the art falls under
+	small works, abstract, acrylic, painting, paint pouring, patterns

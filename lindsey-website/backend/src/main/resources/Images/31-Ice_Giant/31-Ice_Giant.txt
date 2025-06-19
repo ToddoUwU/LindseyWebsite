@@ -1,0 +1,30 @@
+
+Title
+	Ice Giant
+
+ArtDescription 
+	Acrylic figurative study of a Viking warrior in an ice cave
+
+Dimensions
+	14"x17"
+
+Medium
+	Acrylic on canvas
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$200
+
+Categories - List of all categories the art falls under
+	acrylic, painting, figurative, realism, study, fantasy, abstract

@@ -1,0 +1,18 @@
+
+Title
+
+ArtDescription ,
+
+Dimensions
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+
+OriginalPrice - Price of the original artwork not print'
+
+Categories - List of all categories the art falls under 

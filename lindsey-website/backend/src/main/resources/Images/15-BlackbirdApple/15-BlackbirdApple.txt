@@ -1,0 +1,30 @@
+
+Title
+	Blackbird Apple
+
+ArtDescription 
+	Album artwork for an illustration class of the Beatles' song "Blackbird" featuring a colored pencil painting of a green apple pecked by birds (to go with the traditional Apple Records green apple usually used for their cd art). This piece pairs with the artwork titled "Blackbird Fly"
+
+Dimensions
+	12"x12" 
+
+Medium
+	Colored pencil on black matte board
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$300
+
+Categories - List of all categories the art falls under
+	Fan art, album art, illustration, colored pencil, painting, bird, food, still life, music, commercial, spiritual

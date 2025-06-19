@@ -1,0 +1,30 @@
+
+Title
+	Frida
+
+ArtDescription 
+	Oil portrait study of the artist Frida Kahlo, one of my art heroines
+
+Dimensions
+	11"x14"
+
+Medium
+	Oil on canvas
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$150
+
+Categories - List of all categories the art falls under
+	oil, painting, portrait, fan art, Frida, women

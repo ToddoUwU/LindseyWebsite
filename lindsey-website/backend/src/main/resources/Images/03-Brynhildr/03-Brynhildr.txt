@@ -1,0 +1,30 @@
+
+Title
+	Brynhildr
+
+ArtDescription 
+	Oil painting illustrating the famous Scandinavian Viking poem about the Valkyrie Brynhildr, daughter of Odin who condemns her to  to marry, while she sleeps atop a mountain surrounded by fire, for the man brave enough to enter through the flames and awake her, only to find out there was deception at play, and ends in tragedy.
+
+Dimensions
+	16"x20"
+
+Medium
+	Oil on canvas
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$500
+
+Categories - List of all categories the art falls under 
+	Painting, Illustration, Fairy tale, Children, Woman, Scandinavian, fantasy, portrait, landscape, nature, viking, oil

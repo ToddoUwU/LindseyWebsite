@@ -1,0 +1,30 @@
+
+Title
+	Riverside Sunrise
+
+ArtDescription 
+	Abstract acrylic painting of an early morning mountain river landscape
+
+Dimensions
+	5"x7"
+
+Medium
+	Acrylic on canvas
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2023
+
+Location
+	San Antonio, Texas
+
+OriginalPrice - Price of the original artwork not print
+	$100
+
+Categories - List of all categories the art falls under
+	acrylic, painting, paint pouring, abstract, nature, landscape

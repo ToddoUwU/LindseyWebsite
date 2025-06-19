@@ -1,0 +1,30 @@
+
+Title
+	First Cacti
+
+ArtDescription 
+	Watercolor still life painting of a small cacti in a pot against a blue sky
+
+Dimensions
+	3.5"x5"
+
+Medium
+	Watercolor
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2011
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$75
+
+Categories - List of all categories the art falls under
+	watercolor, painting, tiny works, still life, nature, plants

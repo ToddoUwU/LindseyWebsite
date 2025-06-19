@@ -1,0 +1,30 @@
+
+Title
+	Spiderweb 1
+
+ArtDescription 	
+	Abstract paint pouring spiderweb done in metallic silver, blues, black, and purples
+
+Dimensions
+	5"x7"
+
+Medium	
+	Acrylic on canvas
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2023
+
+Location
+	San Antonio, Texas
+
+OriginalPrice - Price of the original artwork not print
+	$50
+
+Categories - List of all categories the art falls under
+	Abstract, acrylic, painting, paint pouring, spider

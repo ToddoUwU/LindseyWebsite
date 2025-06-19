@@ -1,0 +1,24 @@
+
+Title
+	Kelpies
+
+ArtDescription 
+	Acrylic painting illustrating the Celtic mythological creatures called Kelpies painted against a trippy abstract neon water background.
+
+Dimensions
+	8"x10"
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2023
+
+OriginalPrice - Price of the original artwork not print
+	$200
+
+Categories - List of all categories the art falls under
+	acrylic, paint pouring, abstract, painting, fantasy, animals, nature, moody, dark, landscapes

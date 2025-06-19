@@ -1,0 +1,30 @@
+
+Title
+	Honeybee
+
+ArtDescription 
+	Lettering ink drawing of a honeybee using just letters from the word honeybee to form the artwork
+	
+Dimensions
+	8.5"x11"	
+
+Medium
+	ink
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012	
+
+Location
+	Salt Lake City Utah
+
+OriginalPrice - Price of the original artwork not print
+	$200	
+
+Categories - List of all categories the art falls under 
+	ink, drawing, insects, nature, animals

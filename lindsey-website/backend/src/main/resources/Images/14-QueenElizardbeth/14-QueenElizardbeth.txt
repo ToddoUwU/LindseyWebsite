@@ -1,0 +1,30 @@
+
+Title
+	Queen Elizardbeth
+
+ArtDescription 	
+	Humorous oil painted poster illustration advertising a circus sideshow act featuring a reptilian snake charming version of Queen Elizabeth I.
+
+Dimensions
+	16"x20"
+
+Medium
+	Oil on canvas
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$600
+
+Categories - List of all categories the art falls under
+	Oil, painting, portrait, fantasy, nature, Renaissance, Old Masters, figurative, poster, illustration, humorous

@@ -1,0 +1,31 @@
+
+Title
+	Blackbird Fly
+
+ArtDescription 
+	Album artwork for an illustration class of the Beatles' song "Blackbird" featuring a colored pencil painting of a pair of hands releasing a blackbird that has broken free from it's bandages and is flying towards light which is abstracted to look like stained glass. This piece pairs with the artwork titled "Blackbird Apple."
+
+Dimensions
+	12"x12"
+
+Medium
+	Colored Pencil on black matte board
+
+SmallImage
+
+LargeImage
+
+LinkToPrint
+
+DateProduced
+	2012
+
+Location
+	Salt Lake City, Utah
+
+OriginalPrice - Price of the original artwork not print
+	$300
+
+Categories - List of all categories the art falls under
+	Fan art, album art, illustration, colored pencil, painting, bird, still life, music, commercial, spiritual
+	
