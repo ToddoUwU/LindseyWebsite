@@ -44,13 +44,31 @@ public class Artwork implements Serializable {
     
     @Column(name = "small_image_url")
     private String smallImageUrl;
-    
+
+    @Column(name = "small_image_width")
+    private Integer smallImageWidth;
+
+    @Column(name = "small_image_height")
+    private Integer smallImageHeight;
+
     @Column(name = "medium_image_url")
     private String mediumImageUrl;
 
+    @Column(name = "medium_image_width")
+    private Integer mediumImageWidth;
+
+    @Column(name = "medium_image_height")
+    private Integer mediumImageHeight;
+
     @Column(name = "large_image_url")
     private String largeImageUrl;
-    
+
+    @Column(name = "large_image_width")
+    private Integer largeImageWidth;
+
+    @Column(name = "large_image_height")
+    private Integer largeImageHeight;
+
     @Column(name = "link_to_print")
     private String linkToPrint;
     

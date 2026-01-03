@@ -23,7 +23,9 @@
         <div class="full-size-view">
           <img
             [alt]="artwork()!.title"
-            [src]="getLargeImageUrl()"
+            [ngSrc]="getLargeImageUrl()"
+            [width]="getLargeImageWidth()"
+            [height]="getLargeImageHeight()"
             class="full-size-image"
           />
           <div class="full-size-controls">
@@ -58,7 +60,9 @@
               aria-label="Click to view full size image">
               <img
                 [alt]="artwork()!.title"
-                [src]="getMediumImageUrl()"
+                [ngSrc]="getMediumImageUrl()"
+                [width]="getMediumImageWidth()"
+                [height]="getMediumImageHeight()"
                 class="artwork-image"
               />
               <div class="image-overlay">

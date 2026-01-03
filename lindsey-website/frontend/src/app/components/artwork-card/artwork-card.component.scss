@@ -5,19 +5,22 @@
 
 .artwork-card {
   background-color: var(--mat-sys-surface-container);
-  border-radius: var(--mat-sys-corner-medium, 0.75rem); /* 12px -> 0.75rem */
-  overflow: hidden;
+  border-radius: var(--mat-sys-corner-medium, 0.75rem);
+  overflow: visible; /* allow pop-out to extend beyond card edges */
   cursor: pointer;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
-  box-shadow: var(--mat-sys-level1, 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.12)); /* 1px 3px */
+  transition: box-shadow 0.28s cubic-bezier(.2,.8,.2,1), transform 0.28s cubic-bezier(.2,.8,.2,1);
+  box-shadow: var(--mat-sys-level1, 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.12));
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative; /* for z-indexing on hover */
+  -webkit-font-smoothing: antialiased;
 
   &:hover,
   &:focus-visible {
-    box-shadow: var(--mat-sys-level3, 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15)); /* 4px 12px */
-    transform: translateY(-0.25rem); /* -4px -> -0.25rem */
+    box-shadow: 0 1.5rem 3.5rem rgba(0,0,0,0.45);
+    transform: translateY(-1rem) scale(1.06);
+    z-index: 1000; /* raised to top layer to ensure it overlaps neighbors */
   }
 
   &:focus-visible {
@@ -27,23 +30,37 @@
 }
 
 .card-image-container {
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-
-  /* default aspect - may be overridden by helper classes */
-  aspect-ratio: 4 / 3;
+  /* Let image container take available vertical space between top and the bottom-aligned card content */
+  flex: 1 1 auto;
+  width: 100%;
+  display: flex;
+  align-items: center; /* vertical centering of the image inside the container */
+  justify-content: center; /* horizontal centering */
+  overflow: visible; /* allow the image to overflow the container on hover */
+  pointer-events: none; /* allow clicks to pass through to card when image overlays */
 
   img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease, opacity 0.2s ease;
+    /* Preserve intrinsic aspect ratio and scale to fit available area without distortion */
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain; /* show full artwork centered, no cropping */
+    transition: transform 0.35s ease, opacity 0.2s ease;
     display: block;
+    will-change: transform;
+    position: relative; /* create stacking context for z-index */
+    z-index: 1010; /* default image stacking above card content */
+    pointer-events: auto; /* image can still receive interactions if needed */
+    transform-origin: center top;
   }
 
-  .artwork-card:hover & img {
-    transform: scale(1.05);
+  /* Make hovered image pop out beyond the card, above siblings */
+  .artwork-card:hover & img,
+  .artwork-card:focus-visible & img {
+    transform: translateY(-8px) scale(1.14);
+    z-index: 1100; /* sit above card content and neighbors */
+    box-shadow: 0 1.25rem 3rem rgba(0,0,0,0.5);
   }
 
   .image-skeleton {
@@ -66,30 +83,34 @@
 
 .sold-badge {
   position: absolute;
-  top: var(--mat-sys-spacing-small, 0.5rem); /* 8px -> 0.5rem */
+  top: var(--mat-sys-spacing-small, 0.5rem);
   right: var(--mat-sys-spacing-small, 0.5rem);
   background-color: var(--mat-sys-tertiary);
   color: var(--mat-sys-on-tertiary);
-  padding: 0.25rem 0.75rem; /* 4px 12px -> 0.25rem 0.75rem */
-  border-radius: var(--mat-sys-corner-full, 6.25rem); /* 100px -> 6.25rem */
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--mat-sys-corner-full, 6.25rem);
   font-family: var(--mat-sys-body-small-font, sans-serif);
   font-size: var(--mat-sys-body-small-size, 0.75rem);
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 0.25rem; /* 4px -> 0.25rem */
+  gap: 0.25rem;
+  z-index: 220; /* ensure badge stays above image when needed */
 
   .material-icons-two-tone {
-    font-size: 0.875rem; /* 14px -> 0.875rem */
+    font-size: 0.875rem;
   }
 }
 
 .card-content {
-  padding: var(--mat-sys-spacing-medium, 1rem); /* 16px -> 1rem */
+  padding: var(--mat-sys-spacing-medium, 1rem);
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* 4px -> 0.25rem */
-  flex-grow: 1;
+  gap: 0.25rem;
+  margin-top: auto; /* push content to the bottom of the card */
+  min-height: 3.5rem; /* ensure content block is consistent height across cards */
+  position: relative;
+  z-index: 10; /* sit below the hovered image */
 }
 
 .card-title {
@@ -117,5 +138,20 @@
   font-size: var(--mat-sys-label-large-size, 0.875rem);
   font-weight: var(--mat-sys-label-large-weight, 500);
   color: var(--mat-sys-primary);
-  margin: 0.5rem 0 0; /* 8px -> 0.5rem */
+  margin: 0.5rem 0 0;
+}
+
+/* Reduce the hover intensity on small touch screens */
+@media (hover: none) and (pointer: coarse) {
+  .artwork-card:hover,
+  .artwork-card:focus-visible {
+    transform: none;
+    box-shadow: var(--mat-sys-level1, 0 0.0625rem 0.1875rem rgba(0,0,0,0.12));
+    z-index: auto;
+  }
+  .artwork-card:hover .card-image-container img,
+  .artwork-card:focus-visible .card-image-container img {
+    transform: none;
+    z-index: 20;
+  }
 }
