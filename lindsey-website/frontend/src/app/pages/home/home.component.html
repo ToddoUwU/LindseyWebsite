@@ -1,0 +1,154 @@
+<main class="home-page">
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading artworks...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <mat-icon>error</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <!-- Featured Artwork Slider -->
+    @if (featuredArtworks().length > 0) {
+      <section
+        class="featured-slider"
+        (mouseenter)="onSliderMouseEnter()"
+        (mouseleave)="onSliderMouseLeave()"
+        aria-label="Featured artwork slideshow">
+
+        <h2 class="section-title">Featured Artwork</h2>
+
+        <div class="carousel-container">
+          <!-- Previous Button -->
+          <button
+            mat-icon-button
+            (click)="prevSlide()"
+            class="carousel-nav prev"
+            aria-label="Previous artwork">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <!-- Carousel Track -->
+          <div class="carousel-track">
+            @for (artwork of featuredArtworks(); track artwork.id; let i = $index) {
+              <div
+                class="carousel-item"
+                [class.active]="currentSlideIndex() === i"
+                [class.prev]="isPrevSlide(i)"
+                [class.next]="isNextSlide(i)"
+                [class.hidden]="!isVisibleSlide(i)"
+                (click)="onCarouselItemClick(i, artwork)"
+                (keydown.enter)="onCarouselItemClick(i, artwork)"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="'View ' + artwork.title">
+                <img
+                  [src]="getSmallImageUrl(artwork)"
+                  [alt]="artwork.title"
+                  class="carousel-image"
+                  [attr.priority]="currentSlideIndex() === i ? '' : null"
+                />
+                @if (currentSlideIndex() === i) {
+                  <div class="carousel-overlay">
+                    <h3 class="carousel-title">{{ artwork.title }}</h3>
+                    <p class="carousel-medium">{{ artwork.medium }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Next Button -->
+          <button
+            mat-icon-button
+            (click)="nextSlide()"
+            class="carousel-nav next"
+            aria-label="Next artwork">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+
+        <!-- Slide Indicators -->
+        <div class="slider-indicators" role="tablist">
+          @for (artwork of featuredArtworks(); track artwork.id; let i = $index) {
+            <button
+              (click)="goToSlide(i)"
+              [class.active]="currentSlideIndex() === i"
+              [attr.aria-selected]="currentSlideIndex() === i"
+              class="indicator"
+              type="button"
+              role="tab"
+              [attr.aria-label]="'Go to ' + artwork.title">
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Available Artwork Section -->
+    <section class="available-artwork-section">
+      <div class="section-header">
+        <h2 class="section-title">Available Artwork</h2>
+
+        <!-- Active Filters Summary -->
+        @if (activeFilterEnabled()) {
+          <div class="filter-summary">
+            <p class="filter-indicator">
+              <mat-icon>filter_list</mat-icon>
+              Showing: <span class="filter-text">{{ getActiveFilterSummary() }}</span>
+              <span class="result-count">({{ filteredArtworksForSale().length }} results)</span>
+            </p>
+            <button
+              mat-flat-button
+              color="secondary"
+              (click)="clearAllFilters()"
+              class="clear-all-button">
+              <mat-icon>clear</mat-icon>
+              Clear All
+            </button>
+          </div>
+        }
+
+        <!-- Filter Component -->
+        <app-artwork-filter
+          [categories]="categories()"
+          [dimensions]="dimensions()"
+          [mediums]="mediums()"
+          [activeFilters]="activeFilters()"
+          (filtersChanged)="onFiltersChanged($event)"
+        />
+      </div>
+
+
+
+      <div class="artwork-grid" aria-label="Available artworks gallery">
+        @for (artwork of filteredArtworksForSale(); track artwork.id) {
+          <app-artwork-card
+            (artworkSelected)="onArtworkSelected($event)"
+            [artwork]="artwork"
+          />
+        } @empty {
+          <div class="empty-state">
+            <mat-icon>image_not_supported</mat-icon>
+            @if (activeFilterEnabled()) {
+              <p>No artworks match your current filters.</p>
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="clearAllFilters()">
+                Clear Filters
+              </button>
+            } @else {
+              <p>No artworks available at this time.</p>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  }
+</main>
+
+<!-- Artwork Dialog -->
+<app-artwork-dialog/>

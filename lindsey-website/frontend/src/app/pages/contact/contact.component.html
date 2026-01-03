@@ -1,0 +1,137 @@
+<main class="contact-page">
+  <section class="contact-hero">
+    <h1 class="page-title">Contact</h1>
+    <p class="page-subtitle">Have a question or interested in a piece? Get in touch!</p>
+  </section>
+
+  <div class="contact-content">
+    <section class="contact-form-section">
+      <form (submit)="onSubmit($event)" class="contact-form">
+        <div class="form-group">
+          <label class="form-label" for="name">Name</label>
+          <input
+            (input)="updateField('name', $event)"
+            [value]="formData().name"
+            class="form-input"
+            id="name"
+            placeholder="Your name"
+            required
+            type="text"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input
+            (input)="updateField('email', $event)"
+            [value]="formData().email"
+            class="form-input"
+            id="email"
+            placeholder="your.email@example.com"
+            required
+            type="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="subject">Subject</label>
+          <input
+            (input)="updateField('subject', $event)"
+            [value]="formData().subject"
+            class="form-input"
+            id="subject"
+            placeholder="What is this regarding?"
+            required
+            type="text"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="message">Message</label>
+          <textarea
+            (input)="updateField('message', $event)"
+            [value]="formData().message"
+            class="form-input form-textarea"
+            id="message"
+            placeholder="Your message..."
+            required
+            rows="5"
+          ></textarea>
+        </div>
+
+        <button
+          [disabled]="isSubmitting()"
+          class="submit-button"
+          type="submit">
+          @if (isSubmitting()) {
+            <span class="material-symbols-rounded spinning">sync</span>
+            Sending...
+          } @else {
+            <span class="material-symbols-rounded">send</span>
+            Send Message
+          }
+        </button>
+
+        @if (submitSuccess()) {
+          <div class="form-message success">
+            <span class="material-symbols-rounded">check_circle</span>
+            Thank you! Your message has been sent successfully.
+          </div>
+        }
+
+        @if (submitError()) {
+          <div class="form-message error">
+            <span class="material-symbols-rounded">error</span>
+            Something went wrong. Please try again later.
+          </div>
+        }
+      </form>
+    </section>
+
+    <section class="contact-info-section">
+      <div class="info-card">
+        <h3>Other Ways to Reach Me</h3>
+
+        <div class="info-item">
+          <span class="material-symbols-rounded">email</span>
+          <div>
+            <h4>Email</h4>
+            <a href="mailto:lindsey@example.com">lindsey&#64;example.com</a>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="material-symbols-rounded">location_on</span>
+          <div>
+            <h4>Studio Location</h4>
+            <p>Available by appointment</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="material-symbols-rounded">schedule</span>
+          <div>
+            <h4>Response Time</h4>
+            <p>Usually within 24-48 hours</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="social-card">
+        <h3>Follow My Work</h3>
+        <div class="social-links">
+          <a aria-label="Instagram" class="social-link" href="#">
+            <span class="material-symbols-rounded">photo_camera</span>
+          </a>
+          <a aria-label="Pinterest" class="social-link" href="#">
+            <span class="material-symbols-rounded">push_pin</span>
+          </a>
+          <a aria-label="Facebook" class="social-link" href="#">
+            <span class="material-symbols-rounded">thumb_up</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+

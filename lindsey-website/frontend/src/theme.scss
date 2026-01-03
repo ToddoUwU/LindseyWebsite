@@ -1,0 +1,32 @@
+@use '@angular/material';
+@use './app_theme-colors' as my-theme;
+
+html {
+  // Must specify color-scheme for theme mixin to automatically work
+  // This enables the CSS light-dark() function for automatic theme switching
+  color-scheme: light dark;
+
+  // Create one theme that works automatically for light and dark theme
+  // Font families from @fontsource packages (loaded in angular.json):
+  // - @fontsource/lobster -> 'Lobster'
+  // - @fontsource-variable/merriweather -> 'Merriweather Variable'
+  @include material.theme((
+    color: (
+      primary: my-theme.$primary-palette,
+      tertiary: my-theme.$tertiary-palette,
+    ),
+    typography: (
+      brand-family: ('Lobster', cursive),
+      plain-family: ('Merriweather Variable', serif),
+      bold-weight: 700,
+      medium-weight: 500,
+      regular-weight: 400,
+    ),
+    density: 0,
+  ));
+
+  // Use high contrast values when users prefer contrast
+  @media (prefers-contrast: more) {
+    @include my-theme.high-contrast-overrides(color-scheme);
+  }
+}

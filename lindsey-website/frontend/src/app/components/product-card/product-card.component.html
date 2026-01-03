@@ -1,0 +1,54 @@
+<article
+  (click)="onCardClick()"
+  (keydown)="onKeyPress($event)"
+  [attr.aria-label]="'View ' + product().description"
+  class="product-card"
+  role="button"
+  tabindex="0">
+  <div class="card-image-container">
+    <!-- Skeleton placeholder shown until imageLoaded -->
+    @if (!imageLoaded) {
+      <div class="image-skeleton" aria-hidden="true"></div>
+    }
+
+    <img
+      class="product-image"
+      [alt]="product().description"
+      [src]="getImageUrl()"
+
+      (load)="onImageLoad($event)"
+      [class.hidden]="!imageLoaded"
+    />
+    @if (!product().isAvailable) {
+      <div class="out-of-stock-badge">
+        <span class="material-icons-two-tone">remove_shopping_cart</span>
+        Out of Stock
+      </div>
+    }
+    <div class="category-badge">
+      <span class="material-icons-two-tone">{{ getCategoryIcon() }}</span>
+    </div>
+  </div>
+  <div class="card-content">
+    <h3 class="card-title">{{ product().description }}</h3>
+    @if (product().artworkTitle) {
+      <p class="card-artwork">{{ product().artworkTitle }}</p>
+    }
+    <p class="card-category">{{ product().productCategory }}</p>
+    <div class="card-footer">
+      @if (product().price) {
+        <span class="card-price">${{ product().price | number }}</span>
+      } @else {
+        <span class="card-price-label">See store for price</span>
+      }
+      <button
+        (click)="onViewClick($event)"
+        [disabled]="!product().isAvailable"
+        class="view-button"
+        type="button">
+        <span class="material-icons-two-tone">storefront</span>
+        Buy Now
+      </button>
+    </div>
+  </div>
+</article>

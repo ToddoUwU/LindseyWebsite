@@ -1,0 +1,170 @@
+@if (artwork()) {
+  <div
+    (click)="onBackdropClick($event)"
+    (keydown)="onKeyDown($event)"
+    [attr.aria-labelledby]="'dialog-title-' + artwork()!.id"
+    [class.closing]="isClosing()"
+    [class.full-size-mode]="showFullSize()"
+    aria-modal="true"
+    class="dialog-backdrop"
+    role="dialog">
+    <div class="dialog-container" [class.full-size]="showFullSize()">
+      <!-- Close Button -->
+      <button
+        mat-icon-button
+        (click)="close()"
+        aria-label="Close dialog"
+        class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <!-- Full Size View -->
+      @if (showFullSize()) {
+        <div class="full-size-view">
+          <img
+            [alt]="artwork()!.title"
+            [src]="getLargeImageUrl()"
+            class="full-size-image"
+          />
+          <div class="full-size-controls">
+            <button
+              mat-fab
+              extended
+              (click)="toggleFullSize()"
+              class="back-button">
+              <mat-icon>arrow_back</mat-icon>
+              Back to Details
+            </button>
+            <button
+              mat-fab
+              extended
+              (click)="openFullSizeInNewTab()"
+              class="new-tab-button">
+              <mat-icon>open_in_new</mat-icon>
+              Open in New Tab
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Normal Dialog View -->
+        <div class="dialog-content">
+          <div class="image-section">
+            <div
+              class="image-container"
+              (click)="toggleFullSize()"
+              (keydown.enter)="toggleFullSize()"
+              tabindex="0"
+              role="button"
+              aria-label="Click to view full size image">
+              <img
+                [alt]="artwork()!.title"
+                [src]="getMediumImageUrl()"
+                class="artwork-image"
+              />
+              <div class="image-overlay">
+                <mat-icon>zoom_in</mat-icon>
+                <span>View Full Size</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h2 [id]="'dialog-title-' + artwork()!.id" class="artwork-title">
+              {{ artwork()!.title }}
+            </h2>
+
+            @if (getYear()) {
+              <p class="artwork-year">{{ getYear() }}</p>
+            }
+
+            <p class="artwork-medium">{{ artwork()!.medium }}</p>
+
+            @if (artwork()!.dimensions) {
+              <p class="artwork-dimensions">{{ artwork()!.dimensions }}</p>
+            }
+
+            <p class="artwork-description">{{ artwork()!.artDescription }}</p>
+
+            @if (getCategories().length > 0) {
+              <div class="artwork-category">
+                <mat-icon>category</mat-icon>
+                {{ getCategories().join(', ') }}
+              </div>
+            }
+
+            @if (artwork()!.location) {
+              <div class="artwork-location">
+                <mat-icon>location_on</mat-icon>
+                {{ artwork()!.location }}
+              </div>
+            }
+
+            <!-- Original Artwork Price Section -->
+            <div class="artwork-price-section">
+              @if (!artwork()!.forSale) {
+                <span class="sold-status">
+                  <mat-icon>sell</mat-icon>
+                  Original Sold
+                </span>
+              } @else if (artwork()!.originalPrice) {
+                <div class="original-price-info">
+                  <span class="price-label">Original Artwork</span>
+                  <span class="price">${{ artwork()!.originalPrice | number }}</span>
+                </div>
+                <button mat-flat-button color="primary" class="inquire-button">
+                  <mat-icon>mail</mat-icon>
+                  Inquire About Original
+                </button>
+              }
+            </div>
+
+            <!-- Simple Print Link (if available) -->
+            @if (artwork()!.linkToPrint) {
+              <a
+                mat-stroked-button
+                [href]="artwork()!.linkToPrint"
+                class="print-link"
+                target="_blank"
+                rel="noopener">
+                <mat-icon>print</mat-icon>
+                Order Print
+              </a>
+            }
+
+            <!-- Available Products Section -->
+            @if (artworkProducts().length > 0) {
+              <div class="products-section">
+                <h3 class="products-title">
+                  <mat-icon>storefront</mat-icon>
+                  Available Products
+                </h3>
+                <div class="products-list">
+                  @for (product of artworkProducts(); track product.id) {
+                    <button
+                      mat-stroked-button
+                      (click)="openProduct(product)"
+                      class="product-item">
+                      <mat-icon class="product-icon">{{ getProductIcon(product.productCategory) }}</mat-icon>
+                      <span class="product-info">
+                        <span class="product-name">{{ product.description }}</span>
+                        @if (product.price) {
+                          <span class="product-price">${{ product.price | number }}</span>
+                        }
+                      </span>
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  }
+                </div>
+              </div>
+            } @else if (loadingProducts()) {
+              <div class="products-loading">
+                <mat-icon class="spinning">sync</mat-icon>
+                Loading products...
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

@@ -1,4 +1,8 @@
-/* You can add global styles to this file, and also import other style files */
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+// Main styles entry point for the application
+// This file is referenced in angular.json and imports all global styles
+
+// Import Angular Material theme (includes M3 theming with light/dark support)
+@use './theme.scss';
+
+// Import application-wide styles with CSS custom properties
+@use './app/styles.scss';

@@ -1,0 +1,109 @@
+<section class="shop-page">
+  <div class="shop-header">
+    <h1 class="page-title">Shop</h1>
+    <p class="page-subtitle">
+      Browse prints, apparel, and merchandise featuring Lindsey's original artwork.
+    </p>
+
+    <!-- Link to full Printify storefront -->
+    <button (click)="openPrintifyStore()" class="visit-store-button" type="button">
+      <span class="material-symbols-rounded">storefront</span>
+      Visit Full Store on Printify
+      <span class="material-symbols-rounded">open_in_new</span>
+    </button>
+  </div>
+
+  <!-- Category Filter Tabs -->
+  <nav aria-label="Product categories" class="category-tabs">
+    @for (cat of categories(); track cat.key) {
+      <button
+        (click)="onCategorySelect(cat.key)"
+        [attr.aria-pressed]="selectedCategory() === cat.key"
+        [class.active]="selectedCategory() === cat.key"
+        class="category-tab"
+        type="button">
+        <span class="material-symbols-rounded">{{ cat.icon }}</span>
+        <span class="tab-label">{{ cat.label }}</span>
+        <span class="tab-count">({{ getCategoryCount(cat.key) }})</span>
+      </button>
+    }
+  </nav>
+
+  <!-- Reset Button -->
+  @if (selectedCategory()) {
+    <button (click)="onCategorySelect(null)" class="reset-filter-button" type="button">
+      <span class="material-symbols-rounded">clear</span>
+      Show All Products
+    </button>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading products...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="error-state">
+      <span class="material-symbols-rounded">error_outline</span>
+      <p>{{ error() }}</p>
+      <button (click)="ngOnInit()" class="retry-button" type="button">
+        Try Again
+      </button>
+    </div>
+  }
+
+  <!-- Products Grid -->
+  @if (!loading() && !error()) {
+    @if (filteredProducts().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-rounded">inventory_2</span>
+        <p>No products found in this category.</p>
+      </div>
+    } @else {
+      <div class="products-grid">
+        @for (product of filteredProducts(); track product.id) {
+          <app-product-card
+            (viewProduct)="onProductView($event)"
+            [product]="product"
+          />
+        }
+      </div>
+    }
+  }
+
+  <!-- Info Section -->
+  <section class="info-section">
+    <div class="info-card">
+      <span class="material-symbols-rounded">palette</span>
+      <h3>Original Artwork</h3>
+      <p>
+        Looking for original paintings? Visit the
+        <a routerLink="/">home page</a>
+        to browse available original artwork for sale.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <span class="material-symbols-rounded">local_shipping</span>
+      <h3>Shipping & Handling</h3>
+      <p>
+        All merchandise is printed and shipped through Printify's
+        worldwide fulfillment network.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <span class="material-symbols-rounded">support_agent</span>
+      <h3>Questions?</h3>
+      <p>
+        Have questions about products or custom orders?
+        <a routerLink="/contact">Contact Lindsey</a> directly.
+      </p>
+    </div>
+  </section>
+</section>
+

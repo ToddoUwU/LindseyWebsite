@@ -1,34 +1,70 @@
+# ============================================================
+# Multi-stage Docker build for Lindsey Website
+# Node 22 | Angular 21 | TypeScript 5.9 | Java 21
+# Environment variables must be provided at runtime (no defaults)
+# ============================================================
+
 # Stage 1: Build Angular frontend
-FROM node:18 AS frontend-build
+FROM node:22-alpine AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm ci
 COPY frontend/ .
-RUN npm run build -- --output-path=../backend/src/main/resources/static
+# Build outputs to ../backend/src/main/resources/static as configured in angular.json
+# But since we're in a container, we output locally and copy later
+RUN npm run build -- --configuration=production --output-path=dist/lindsey-website
 
-# Stage 2: Build Spring Boot backend with improved caching for development
+# Stage 2: Build Spring Boot backend
 FROM maven:3.9.5-eclipse-temurin-21 AS backend-build
+WORKDIR /app
+
+# Copy pom.xml first for dependency caching
+COPY backend/pom.xml ./backend/
 WORKDIR /app/backend
 
-# Copy pom.xml first for better layer caching
-COPY backend/pom.xml .
+# Download dependencies (cached unless pom.xml changes)
+RUN mvn dependency:go-offline -B
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN mvn dependency:go-offline
+# Copy frontend build output to Spring static resources
+COPY --from=frontend-build /app/frontend/dist/lindsey-website/browser/ ./src/main/resources/static/
 
-# Add build timestamp to force rebuilds (for development)
+# Copy backend source
+COPY backend/src ./src
+
+# Optional: Build timestamp to force rebuild (pass --build-arg BUILD_TIMESTAMP=$(date +%s))
 ARG BUILD_TIMESTAMP
-RUN echo "Build timestamp: $BUILD_TIMESTAMP"
+RUN echo "Build timestamp: ${BUILD_TIMESTAMP:-none}"
 
-# Build the application
-RUN mvn clean package -DskipTests
+# Build JAR (skip frontend build since we did it separately)
+RUN mvn clean package -DskipTests -Dskip.frontend.build=true
 
-# Stage 3: Final runtime container
-FROM eclipse-temurin:21-jre
+# Stage 3: Runtime container
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=backend-build /app/backend/target/lindsey-website-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
 
-# Set Spring Boot profile through ENV for runtime control
-# Use default value if ENVIRONMENT variable is not set
-ENV SPRING_PROFILES_ACTIVE=${ENVIRONMENT:-dev}
+# Create non-root user for security
+RUN addgroup -g 1001 appgroup && \
+    adduser -u 1001 -G appgroup -s /bin/sh -D appuser
+
+# Copy the WAR file (Spring Boot packages as WAR but it's executable)
+COPY --from=backend-build /app/backend/target/lindsey-website-*.war app.war
+
+# Create certs directory (will be mounted as volume)
+RUN mkdir -p /app/certs && chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose HTTPS port
+EXPOSE 8443
+
+# Health check (using --no-check-certificate for self-signed certs)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider --no-check-certificate https://localhost:8443/api/health || exit 1
+
+# Environment variables - MUST be provided at runtime
+# No default values for sensitive data
+ENV SPRING_PROFILES_ACTIVE=${ENVIRONMENT:-prod}
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.war"]

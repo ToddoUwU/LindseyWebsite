@@ -1,0 +1,197 @@
+<!-- Filter Toggle Button -->
+<button
+  mat-stroked-button
+  (click)="open()"
+  class="filter-toggle-button"
+  [class.has-filters]="activeFilterCount() > 0"
+  [matBadge]="activeFilterCount()"
+  matBadgeColor="accent"
+  matBadgeSize="small"
+  matBadgePosition="above after"
+  [matBadgeHidden]="activeFilterCount() === 0">
+  <mat-icon>tune</mat-icon>
+  <span class="button-text">Filter</span>
+</button>
+
+<!-- Filter Panel with Backdrop -->
+@if (isOpen()) {
+  <!-- Backdrop - clicking dismisses the filter -->
+  <div
+    class="filter-backdrop"
+    [class.blur]="isMobile()"
+    (click)="onBackdropClick()"
+    aria-hidden="true">
+  </div>
+
+  <!-- Filter Panel - slides in from right -->
+  <aside
+    class="filter-panel"
+    [class.mobile]="isMobile()"
+    role="dialog"
+    aria-label="Filter artworks"
+    aria-modal="true">
+
+    <!-- Header -->
+    <header class="filter-header">
+      <h3 class="filter-title">
+        <mat-icon>tune</mat-icon>
+        Filter Artwork
+      </h3>
+      <button
+        mat-icon-button
+        (click)="close()"
+        aria-label="Close filter panel">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <!-- Search by Title -->
+    <div class="search-section">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search by title</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          type="text"
+          [value]="getSearchTerm()"
+          (input)="onSearchInput($event)"
+          placeholder="Enter artwork title..."
+          autocomplete="off"
+        />
+        @if (getSearchTerm()) {
+          <button
+            matSuffix
+            mat-icon-button
+            aria-label="Clear search"
+            (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Filter Content with Material Expansion Panels -->
+    <div class="filter-content">
+      <mat-accordion multi>
+        <!-- Categories Section -->
+        <mat-expansion-panel expanded>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>category</mat-icon>
+              Categories
+              @if (getCategoryCount() > 0) {
+                <span class="section-count">({{ getCategoryCount() }})</span>
+              }
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="filter-options">
+            @for (category of categories(); track category) {
+              <mat-checkbox
+                [checked]="isCategorySelected(category)"
+                (change)="toggleCategory(category)"
+                color="primary">
+                {{ category }}
+              </mat-checkbox>
+            } @empty {
+              <p class="no-options">No categories available</p>
+            }
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Dimensions Section -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>straighten</mat-icon>
+              Size
+              @if (getDimensionCount() > 0) {
+                <span class="section-count">({{ getDimensionCount() }})</span>
+              }
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="filter-options">
+            @for (dimension of dimensions(); track dimension) {
+              <mat-checkbox
+                [checked]="isDimensionSelected(dimension)"
+                (change)="toggleDimension(dimension)"
+                color="primary">
+                {{ dimension }}
+              </mat-checkbox>
+            } @empty {
+              <p class="no-options">No sizes available</p>
+            }
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Mediums Section -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>brush</mat-icon>
+              Medium
+              @if (getMediumCount() > 0) {
+                <span class="section-count">({{ getMediumCount() }})</span>
+              }
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="filter-options">
+            @for (medium of mediums(); track medium) {
+              <mat-checkbox
+                [checked]="isMediumSelected(medium)"
+                (change)="toggleMedium(medium)"
+                color="primary">
+                {{ medium }}
+              </mat-checkbox>
+            } @empty {
+              <p class="no-options">No mediums available</p>
+            }
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Footer -->
+    <footer class="filter-footer">
+      @if (isMobile()) {
+        <button
+          mat-button
+          (click)="clearAllFilters()"
+          [disabled]="getPendingFilterCount() === 0 && !getPendingSearchTerm()">
+          Clear All
+        </button>
+        <div class="footer-actions">
+          <button
+            mat-stroked-button
+            (click)="cancelFilters()">
+            Cancel
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="applyFilters()">
+            Apply
+            @if (getPendingFilterCount() > 0 || getPendingSearchTerm()) {
+              ({{ getTotalPendingCount() }})
+            }
+          </button>
+        </div>
+      } @else {
+        @if (activeFilterCount() > 0) {
+          <button
+            mat-stroked-button
+            color="warn"
+            (click)="clearAllFilters()"
+            class="clear-all-button">
+            <mat-icon>clear_all</mat-icon>
+            Clear All Filters
+          </button>
+        }
+      }
+    </footer>
+  </aside>
+}

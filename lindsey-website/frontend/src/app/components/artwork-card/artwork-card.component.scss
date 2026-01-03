@@ -1,0 +1,121 @@
+@charset "UTF-8";
+:host {
+  display: block;
+}
+
+.artwork-card {
+  background-color: var(--mat-sys-surface-container);
+  border-radius: var(--mat-sys-corner-medium, 0.75rem); /* 12px -> 0.75rem */
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  box-shadow: var(--mat-sys-level1, 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.12)); /* 1px 3px */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &:hover,
+  &:focus-visible {
+    box-shadow: var(--mat-sys-level3, 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15)); /* 4px 12px */
+    transform: translateY(-0.25rem); /* -4px -> -0.25rem */
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 0.125rem; /* 2px -> 0.125rem */
+  }
+}
+
+.card-image-container {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  /* default aspect - may be overridden by helper classes */
+  aspect-ratio: 4 / 3;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease, opacity 0.2s ease;
+    display: block;
+  }
+
+  .artwork-card:hover & img {
+    transform: scale(1.05);
+  }
+
+  .image-skeleton {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.04) 100%);
+    animation: skeleton-shimmer 1.2s linear infinite;
+  }
+
+  img.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+.sold-badge {
+  position: absolute;
+  top: var(--mat-sys-spacing-small, 0.5rem); /* 8px -> 0.5rem */
+  right: var(--mat-sys-spacing-small, 0.5rem);
+  background-color: var(--mat-sys-tertiary);
+  color: var(--mat-sys-on-tertiary);
+  padding: 0.25rem 0.75rem; /* 4px 12px -> 0.25rem 0.75rem */
+  border-radius: var(--mat-sys-corner-full, 6.25rem); /* 100px -> 6.25rem */
+  font-family: var(--mat-sys-body-small-font, sans-serif);
+  font-size: var(--mat-sys-body-small-size, 0.75rem);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* 4px -> 0.25rem */
+
+  .material-icons-two-tone {
+    font-size: 0.875rem; /* 14px -> 0.875rem */
+  }
+}
+
+.card-content {
+  padding: var(--mat-sys-spacing-medium, 1rem); /* 16px -> 1rem */
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; /* 4px -> 0.25rem */
+  flex-grow: 1;
+}
+
+.card-title {
+  font-family: var(--mat-sys-title-medium-font, 'Lobster', cursive);
+  font-size: var(--mat-sys-title-medium-size, 1.125rem);
+  font-weight: var(--mat-sys-title-medium-weight, 500);
+  line-height: var(--mat-sys-title-medium-line-height, 1.5rem);
+  color: var(--mat-sys-on-surface);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-medium {
+  font-family: var(--mat-sys-body-small-font, sans-serif);
+  font-size: var(--mat-sys-body-small-size, 0.75rem);
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}
+
+.card-price {
+  font-family: var(--mat-sys-label-large-font, sans-serif);
+  font-size: var(--mat-sys-label-large-size, 0.875rem);
+  font-weight: var(--mat-sys-label-large-weight, 500);
+  color: var(--mat-sys-primary);
+  margin: 0.5rem 0 0; /* 8px -> 0.5rem */
+}

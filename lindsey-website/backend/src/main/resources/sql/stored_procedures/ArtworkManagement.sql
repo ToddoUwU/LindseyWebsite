@@ -49,3 +49,40 @@ BEGIN
     WHERE id = p_id;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Get all unique categories (split from comma-delimited string)
+CREATE OR REPLACE FUNCTION get_unique_categories()
+RETURNS TABLE(category VARCHAR) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT DISTINCT TRIM(category_item)::VARCHAR as category
+    FROM ARTWORKS,
+    LATERAL unnest(string_to_array(categories, ',')) AS category_item
+    WHERE categories IS NOT NULL AND categories != ''
+    ORDER BY category;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Get all unique years from date_produced
+CREATE OR REPLACE FUNCTION get_unique_years()
+RETURNS TABLE(year INTEGER) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT DISTINCT EXTRACT(YEAR FROM date_produced)::INTEGER as year
+    FROM ARTWORKS
+    WHERE date_produced IS NOT NULL
+    ORDER BY year DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Get all unique dimensions
+CREATE OR REPLACE FUNCTION get_unique_dimensions()
+RETURNS TABLE(dimension VARCHAR) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT DISTINCT dimensions::VARCHAR as dimension
+    FROM ARTWORKS
+    WHERE dimensions IS NOT NULL AND dimensions != ''
+    ORDER BY dimension;
+END;
+$$ LANGUAGE plpgsql;

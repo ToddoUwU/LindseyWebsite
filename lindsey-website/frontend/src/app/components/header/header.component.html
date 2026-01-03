@@ -1,0 +1,70 @@
+<header class="app-header">
+  <div class="header-content">
+    <a aria-label="Home" class="logo" routerLink="/">
+      <span class="logo-text">Lindsey's Art</span>
+    </a>
+
+    <div class="header-actions">
+      <!-- Filter Button - Opens filter panel on home page -->
+      <button
+        mat-icon-button
+        (click)="openFilter()"
+        aria-label="Filter artworks"
+        class="filter-button">
+        <mat-icon>filter_list</mat-icon>
+      </button>
+
+      <!-- Hamburger Menu Button -->
+      <button
+        mat-icon-button
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="isMenuOpen()"
+        aria-label="Toggle navigation menu"
+        class="menu-button">
+        <mat-icon>
+          {{ isMenuOpen() ? 'close' : 'menu' }}
+        </mat-icon>
+      </button>
+
+      <!-- Dropdown Menu -->
+      @if (isMenuOpen()) {
+        <nav aria-label="Main navigation" class="menu-dropdown" role="navigation">
+          <a
+            (click)="closeMenu()"
+            [routerLinkActiveOptions]="{exact: true}"
+            class="menu-item"
+            routerLink="/"
+            routerLinkActive="active">
+            <mat-icon>home</mat-icon>
+            Home
+          </a>
+          <a
+            (click)="closeMenu()"
+            class="menu-item"
+            routerLink="/shop"
+            routerLinkActive="active">
+            <mat-icon>storefront</mat-icon>
+            Shop
+          </a>
+          <a
+            (click)="closeMenu()"
+            class="menu-item"
+            routerLink="/about"
+            routerLinkActive="active">
+            <mat-icon>person</mat-icon>
+            About
+          </a>
+          <a
+            (click)="closeMenu()"
+            class="menu-item"
+            routerLink="/contact"
+            routerLinkActive="active">
+            <mat-icon>mail</mat-icon>
+            Contact
+          </a>
+        </nav>
+      }
+    </div>
+  </div>
+</header>
+

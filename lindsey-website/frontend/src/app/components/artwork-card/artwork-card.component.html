@@ -1,0 +1,32 @@
+<article
+  (click)="onCardClick()"
+  (keydown)="onKeyPress($event)"
+  [attr.aria-label]="'View ' + artwork().title"
+  class="artwork-card"
+  role="button"
+  tabindex="0">
+  <div class="card-image-container">
+    <!-- skeleton until loaded -->
+    @if (!imageLoaded) {
+      <div class="image-skeleton" aria-hidden="true"></div>
+    }
+
+    <img
+      [alt]="artwork().title"
+      [src]="getImageUrl()"
+
+      (load)="onImageLoad($event)"
+      [class.hidden]="!imageLoaded"
+    />
+    @if (!artwork().forSale) {
+      <div class="sold-badge">
+        <mat-icon>sell</mat-icon>
+        Sold
+      </div>
+    }
+  </div>
+  <div class="card-content">
+    <h3 class="card-title">{{ artwork().title }}</h3>
+    <p class="card-medium">{{ artwork().medium }}</p>
+  </div>
+</article>

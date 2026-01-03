@@ -1,6 +1,6 @@
 package com.lindseyayresart.lindseywebsite.Config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -8,6 +8,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +30,17 @@ public class DatabaseInitializer {
     
     private final JdbcTemplate jdbcTemplate;
     
-    @Autowired
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /**
+     * When true, drops and recreates tables on startup.
+     * Set via environment variable: DB_RECREATE_TABLES=true
+     * Default: false (safe for production)
+     */
+    @Value("${DB_RECREATE_TABLES:false}")
+    private boolean recreateTables;
+
     public DatabaseInitializer(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -36,65 +48,213 @@ public class DatabaseInitializer {
     @PostConstruct
     @Transactional
     public void initializeDatabase() {
-        logger.info("Initializing database");
-        // Add this to the beginning of your initializeDatabase method
+        logger.info("Initializing database (recreateTables={})", recreateTables);
+
+        // Log database connection info using JPA EntityManager
         try {
-            if (jdbcTemplate.getDataSource() != null) {
-                logger.info("Database URL: {}", jdbcTemplate.getDataSource().getConnection().getMetaData().getURL());
-            } else {
-                logger.warn("DataSource is null, cannot log database URL.");
-            }
-        } catch (java.sql.SQLException e) {
-            logger.error("Failed to get database URL", e);
+            String schema = (String) entityManager
+                .createNativeQuery("SELECT current_schema()")
+                .getSingleResult();
+            logger.info("Database schema: {}", schema);
+
+            String dbUrl = (String) entityManager
+                .createNativeQuery("SELECT current_database()")
+                .getSingleResult();
+            logger.info("Database name: {}", dbUrl);
+        } catch (Exception e) {
+            logger.error("Failed to get database info", e);
         }
-        logger.info("Database schema: {}", jdbcTemplate.queryForObject("SELECT current_schema()", String.class));
-        
+
         try {
-            // FORCE DROP AND RECREATE FOR TESTING
-            logger.info("FORCING table drop and recreate");
-            
-            // Backup existing data if needed
-            List<Map<String, Object>> existingData = new ArrayList<>();
-            if (tableExists("ARTWORKS")) {
-                existingData = backupTableData("ARTWORKS");
-                logger.info("Backed up {} records", existingData.size());
+            if (recreateTables) {
+                logger.warn("DB_RECREATE_TABLES=true - Dropping and recreating tables!");
+
+                // ============================================================
+                // Backup existing data
+                // ============================================================
+                List<Map<String, Object>> artworksData = new ArrayList<>();
+                List<Map<String, Object>> productsData = new ArrayList<>();
+
+                if (tableExists("ARTWORK_PRODUCTS")) {
+                    productsData = backupTableData("ARTWORK_PRODUCTS");
+                    logger.info("Backed up {} product records", productsData.size());
+                }
+
+                if (tableExists("ARTWORKS")) {
+                    artworksData = backupTableData("ARTWORKS");
+                    logger.info("Backed up {} artwork records", artworksData.size());
+                }
+
+                // ============================================================
+                // Drop tables (products first due to foreign key)
+                // ============================================================
+                dropTable("ARTWORK_PRODUCTS");
+                logger.info("ARTWORK_PRODUCTS table dropped");
+
+                dropTable("ARTWORKS");
+                logger.info("ARTWORKS table dropped");
+
+                // ============================================================
+                // Recreate tables (artworks first, then products)
+                // ============================================================
+                executeScript("sql/tables/ARTWORKS.sql");
+                logger.info("ARTWORKS table recreated");
+
+                executeScript("sql/tables/ARTWORK_PRODUCTS.sql");
+                logger.info("ARTWORK_PRODUCTS table recreated");
+
+                // ============================================================
+                // Restore data
+                // ============================================================
+                if (!artworksData.isEmpty()) {
+                    restoreTableData("ARTWORKS", artworksData);
+                    logger.info("Artwork data restored");
+                }
+
+                if (!productsData.isEmpty()) {
+                    restoreTableData("ARTWORK_PRODUCTS", productsData);
+                    logger.info("Product data restored");
+                }
+
+                // ============================================================
+                // Drop and recreate functions
+                // ============================================================
+                dropFunction("get_artworks_by_medium");
+                dropFunction("get_artwork_by_title");
+                dropFunction("get_featured_artworks");
+                dropFunction("get_artworks_by_category");
+                dropFunction("get_all_artworks");
+                dropFunction("update_artwork_content_hash");
+                dropFunction("get_unique_categories");
+                dropFunction("get_unique_years");
+                dropFunction("get_unique_dimensions");
+
+                // Recreate stored procedures
+                executeScript("sql/stored_procedures/ArtworkManagement.sql");
+
+                // Recreate triggers
+                executeScript("sql/triggers/update_artwork_timestamp.sql");
+
+                // Verify schema after recreation
+                verifySchema("ARTWORKS");
+
+                // Run merge script to populate artworks
+                runMergeScript();
+            } else {
+                logger.info("Skipping table recreation (DB_RECREATE_TABLES=false)");
+
+                // ============================================================
+                // Ensure tables exist, create if missing
+                // ============================================================
+                if (!tableExists("ARTWORKS")) {
+                    logger.info("ARTWORKS table missing, creating...");
+                    executeScript("sql/tables/ARTWORKS.sql");
+                    executeScript("sql/stored_procedures/ArtworkManagement.sql");
+                    executeScript("sql/triggers/update_artwork_timestamp.sql");
+                    runMergeScript();
+                }
+
+                // Check and create ARTWORK_PRODUCTS table if missing
+                if (!tableExists("ARTWORK_PRODUCTS")) {
+                    logger.info("ARTWORK_PRODUCTS table missing, creating...");
+                    executeScript("sql/tables/ARTWORK_PRODUCTS.sql");
+                }
             }
-            
-            // Drop and recreate
-            dropTable("ARTWORKS");
-            logger.info("Table dropped");
-            executeScript("sql/tables/ARTWORKS.sql");
-            logger.info("Table recreated");
-            
-            // Restore data if we have a backup
-            if (!existingData.isEmpty()) {
-                restoreTableData("ARTWORKS", existingData);
-                logger.info("Data restored");
-            }
-            
-            dropFunction("get_artworks_by_medium");
-            dropFunction("get_artwork_by_title");
-            dropFunction("get_featured_artworks");
-            dropFunction("get_artworks_by_category");
-            dropFunction("get_all_artworks");
-            dropFunction("update_artwork_content_hash");
-            // Then stored procedures - these can be recreated each time
-            executeScript("sql/stored_procedures/ArtworkManagement.sql");
-            
-            // Finally triggers
-            executeScript("sql/triggers/update_artwork_timestamp.sql");
-            
+
             logger.info("Database initialization completed");
-            
-            // Verify schema after recreation
-            verifySchema("ARTWORKS");
-            
+
         } catch (Exception e) {
             logger.error("Database initialization failed", e);
             throw e;
         }
     }
     
+    /**
+     * Run the Python merge script to populate artworks from text files
+     * This is executed on startup after database initialization
+     */
+    private void runMergeScript() {
+        logger.info("Running artwork merge script to populate database");
+
+        try {
+            // Get the project root directory
+            String projectRoot = System.getProperty("user.dir");
+            if (projectRoot == null || projectRoot.isEmpty()) {
+                logger.warn("Could not determine project root directory, skipping merge script");
+                return;
+            }
+
+            // Check if we're running in Docker
+            boolean isDocker = System.getenv("ENVIRONMENT") != null;
+            String scriptsPath = isDocker ? "/app/scripts" : projectRoot + "/scripts";
+            String scriptFile = scriptsPath + "/merge_artworks.py";
+
+            // Check if script exists
+            java.io.File script = new java.io.File(scriptFile);
+            if (!script.exists()) {
+                logger.warn("Merge script not found at: {}, skipping artwork population", scriptFile);
+                return;
+            }
+
+            // Determine environment
+            String env = System.getenv("ENVIRONMENT");
+            if (env == null || env.isEmpty()) {
+                env = "dev";
+            }
+
+            logger.info("Executing merge script: {} --env {}", scriptFile, env);
+
+            // Build the command
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                "python3",
+                scriptFile,
+                "--env", env
+            );
+
+            // Set working directory
+            processBuilder.directory(new java.io.File(isDocker ? "/app" : projectRoot));
+
+            // Redirect error stream to output stream
+            processBuilder.redirectErrorStream(true);
+
+            // Start the process
+            Process process = processBuilder.start();
+
+            // Read and log the output
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    logger.info("[MergeScript] {}", line);
+                }
+            }
+
+            // Wait for completion
+            int exitCode = process.waitFor();
+
+            if (exitCode == 0) {
+                logger.info("Merge script completed successfully");
+
+                // Log how many artworks were imported
+                Integer artworkCount = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM ARTWORKS",
+                    Integer.class
+                );
+                logger.info("Database now contains {} artworks", artworkCount);
+            } else {
+                logger.error("Merge script failed with exit code: {}", exitCode);
+            }
+
+        } catch (IOException e) {
+            logger.error("Error executing merge script: {}", e.getMessage(), e);
+        } catch (InterruptedException e) {
+            logger.error("Merge script execution interrupted", e);
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            logger.error("Unexpected error running merge script", e);
+        }
+    }
+
     private boolean tableExists(String tableName) {
         Integer count = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = ? AND table_schema = current_schema()",
