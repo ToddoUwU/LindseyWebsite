@@ -44,12 +44,25 @@
                 tabindex="0"
                 role="button"
                 [attr.aria-label]="'View ' + artwork.title">
-                <img
-                  [src]="getSmallImageUrl(artwork)"
-                  [alt]="artwork.title"
-                  class="carousel-image"
-                  [attr.priority]="currentSlideIndex() === i ? '' : null"
-                />
+
+                @if (currentSlideIndex() === i) {
+                  <img
+                    ngSrc="{{ getSmallImageUrl(artwork) }}"
+                    [alt]="artwork.title"
+                    class="carousel-image"
+                    [width]="artwork.smallImageWidth"
+                    [height]="artwork.smallImageHeight"
+                  />
+                } @else {
+                  <img
+                    ngSrc="{{ getSmallImageUrl(artwork) }}"
+                    [alt]="artwork.title"
+                    class="carousel-image"
+                    [width]="artwork.smallImageWidth"
+                    [height]="artwork.smallImageHeight"
+                  />
+                }
+
                 @if (currentSlideIndex() === i) {
                   <div class="carousel-overlay">
                     <h3 class="carousel-title">{{ artwork.title }}</h3>

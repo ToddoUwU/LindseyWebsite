@@ -1,5 +1,5 @@
 import {Component, effect, HostListener, inject, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {ArtworkService} from '../../services/artwork.service';
@@ -10,7 +10,7 @@ import {environment} from '../../../environments/environment';
 @Component({
   selector: 'app-artwork-dialog',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, NgOptimizedImage],
   templateUrl: './artwork-dialog.component.html',
   styleUrl: './artwork-dialog.component.scss'
 })
@@ -130,6 +130,18 @@ export class ArtworkDialogComponent {
   }
 
   /**
+   * Get medium image dimensions (width, height)
+   */
+  getMediumImageWidth(): number | null {
+    const artwork = this.artwork();
+    return artwork?.mediumImageWidth ?? null;
+  }
+  getMediumImageHeight(): number | null {
+    const artwork = this.artwork();
+    return artwork?.mediumImageHeight ?? null;
+  }
+
+  /**
    * Get large/full-size image URL
    */
   getLargeImageUrl(): string {
@@ -140,6 +152,18 @@ export class ArtworkDialogComponent {
       return url;
     }
     return `${environment.imageBaseUrl}${url}`;
+  }
+
+  /**
+   * Get large image dimensions (width, height)
+   */
+  getLargeImageWidth(): number | null {
+    const artwork = this.artwork();
+    return artwork?.largeImageWidth ?? null;
+  }
+  getLargeImageHeight(): number | null {
+    const artwork = this.artwork();
+    return artwork?.largeImageHeight ?? null;
   }
 
   /**

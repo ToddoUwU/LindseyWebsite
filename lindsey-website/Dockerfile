@@ -49,6 +49,29 @@ RUN addgroup -g 1001 appgroup && \
 # Copy the WAR file (Spring Boot packages as WAR but it's executable)
 COPY --from=backend-build /app/backend/target/lindsey-website-*.war app.war
 
+# Install Python runtime and tools for merge scripts
+# Use apk to install python3, py3-pip and build-base for psycopg2 binary
+USER root
+# Install Python and build dependencies. postgresql-dev (libpq headers) needed for psycopg2 build
+RUN apk add --no-cache python3 py3-pip build-base postgresql-dev musl-dev libffi-dev openssl-dev
+
+# Create a virtual environment and install Python dependencies there to avoid system-managed warnings
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip setuptools wheel
+
+# Copy scripts and requirements
+COPY scripts/ /app/scripts/
+COPY scripts/requirements.txt /app/scripts/requirements.txt
+
+# Install Python dependencies into the venv
+RUN /opt/venv/bin/pip install --no-cache-dir -r /app/scripts/requirements.txt
+
+# Add venv to PATH so `python3` resolves to venv python for the app user
+ENV PATH="/opt/venv/bin:${PATH}"
+
+# Make scripts executable
+RUN chmod -R a+rx /app/scripts
+
 # Create certs directory (will be mounted as volume)
 RUN mkdir -p /app/certs && chown -R appuser:appgroup /app
 

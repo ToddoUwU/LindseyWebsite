@@ -49,8 +49,13 @@
   transition: all 0.4s ease;
   cursor: pointer;
   border-radius: var(--mat-sys-corner-medium, 12px);
-  overflow: hidden;
+  overflow: visible; /* allow image pop-out */
   box-shadow: var(--mat-sys-level2, 0 2px 6px rgba(0, 0, 0, 0.15));
+
+  &:hover,
+  &.active {
+    z-index: 500; /* raise carousel item above others when active/hovered */
+  }
 
   &:focus-visible {
     outline: 3px solid var(--mat-sys-primary);
@@ -192,6 +197,7 @@
 // ==================== Available Artwork Section ====================
 .available-artwork-section {
   margin-top: var(--mat-sys-spacing-extra-large, 32px);
+  overflow: visible; // allow overflow from grid children
 }
 
 .section-header {
@@ -262,17 +268,21 @@
   grid-template-columns: repeat(4, 1fr);
   gap: var(--mat-sys-spacing-large, 24px);
   animation: fadeIn 0.4s ease-out;
+  grid-auto-rows: 1fr; /* ensure all grid rows are equal height so cards align */
+  align-items: stretch;
+  overflow: visible; /* allow children to overflow (for dramatic pop-out) */
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+// Ensure artwork-grid cells allow overflow and stacking of hovered cards
+.artwork-grid {
+  // ...existing code...
+  overflow: visible; /* already present but keep to emphasize */
+}
+
+.artwork-grid > * {
+  position: relative; /* allow children z-index to work */
+  height: 100%;
+  overflow: visible;
 }
 
 // ==================== Loading & Error States ====================
