@@ -1,12 +1,14 @@
 import {Component, inject, input, output} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 import {ArtworkProduct} from '../../models/api.model';
 import {ProductService} from '../../services/product.service';
 
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.scss'
 })

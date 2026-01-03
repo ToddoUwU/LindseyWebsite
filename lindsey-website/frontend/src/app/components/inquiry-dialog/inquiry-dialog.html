@@ -1,0 +1,92 @@
+@if (isVisible()) {
+  <div class="inquiry-backdrop" (click)="onBackdropClick($event)">
+    <div class="inquiry-dialog">
+      <div class="inquiry-header">
+        <h2>Inquire About Original Artwork</h2>
+        <button mat-icon-button (click)="hide()" aria-label="Close inquiry dialog">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="inquiry-content">
+        @if (artworkService.selectedArtwork(); as artwork) {
+          <div class="artwork-info">
+            <h3>{{ artwork.title }}</h3>
+            @if (artwork.dimensions) {
+              <p class="dimensions">{{ artwork.dimensions }}</p>
+            }
+            @if (artwork.medium) {
+              <p class="medium">{{ artwork.medium }}</p>
+            }
+            @if (artwork.originalPrice) {
+              <p class="price">${{ artwork.originalPrice | number }}</p>
+            }
+          </div>
+        }
+
+        <form (submit)="onSubmit($event)" class="inquiry-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput
+                   [(ngModel)]="formData().name"
+                   (input)="updateField('name', $event)"
+                   name="name"
+                   required
+                   type="text">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput
+                   [(ngModel)]="formData().email"
+                   (input)="updateField('email', $event)"
+                   name="email"
+                   required
+                   type="email">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Additional Message (Optional)</mat-label>
+            <textarea matInput
+                      [(ngModel)]="formData().message"
+                      (input)="updateField('message', $event)"
+                      name="message"
+                      rows="4"
+                      placeholder="Any specific questions or details about your interest in this artwork..."></textarea>
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button mat-button (click)="hide()" type="button">Cancel</button>
+            <button mat-flat-button
+                    color="primary"
+                    [disabled]="isSubmitting()"
+                    type="submit">
+              <ng-container *ngIf="isSubmitting(); else sendIcon">
+                <mat-icon class="spinning">sync</mat-icon>
+                Sending...
+              </ng-container>
+              <ng-template #sendIcon>
+                <mat-icon>send</mat-icon>
+                Send Inquiry
+              </ng-template>
+            </button>
+          </div>
+        </form>
+
+        @if (submitSuccess()) {
+          <div class="message success">
+            <mat-icon>check_circle</mat-icon>
+            Thank you! Your inquiry has been sent successfully.
+          </div>
+        }
+
+        @if (submitError()) {
+          <div class="message error">
+            <mat-icon>error</mat-icon>
+            Something went wrong. Please try again later.
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

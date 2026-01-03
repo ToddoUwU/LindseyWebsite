@@ -1,4 +1,4 @@
-import {Component, effect, HostListener, inject, signal} from '@angular/core';
+import {Component, effect, HostListener, inject, signal, ViewChild} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -6,11 +6,12 @@ import {ArtworkService} from '../../services/artwork.service';
 import {ProductService} from '../../services/product.service';
 import {ArtworkProduct} from '../../models/api.model';
 import {environment} from '../../../environments/environment';
+import {InquiryDialogComponent} from '../inquiry-dialog/inquiry-dialog';
 
 @Component({
   selector: 'app-artwork-dialog',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, NgOptimizedImage],
+  imports: [CommonModule, MatButtonModule, MatIconModule, NgOptimizedImage, InquiryDialogComponent],
   templateUrl: './artwork-dialog.component.html',
   styleUrl: './artwork-dialog.component.scss'
 })
@@ -19,6 +20,8 @@ export class ArtworkDialogComponent {
   readonly artworkProducts = signal<ArtworkProduct[]>([]);
   readonly loadingProducts = signal(false);
   readonly showFullSize = signal(false);
+
+  @ViewChild(InquiryDialogComponent) inquiryDialog!: InquiryDialogComponent;
 
   private artworkService = inject(ArtworkService);
   private productService = inject(ProductService);
@@ -196,5 +199,14 @@ export class ArtworkDialogComponent {
    */
   getProductIcon(category: string): string {
     return this.productService.getCategoryIcon(category);
+  }
+
+  /**
+   * Show inquiry dialog for original artwork
+   */
+  showInquiryDialog(): void {
+    if (this.inquiryDialog) {
+      this.inquiryDialog.show();
+    }
   }
 }

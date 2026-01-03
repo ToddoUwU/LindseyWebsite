@@ -20,7 +20,7 @@
   &:focus-visible {
     box-shadow: 0 1.5rem 3.5rem rgba(0,0,0,0.45);
     transform: translateY(-1rem) scale(1.06);
-    z-index: 1000; /* raised to top layer to ensure it overlaps neighbors */
+    //z-index: 100; /* raised to top layer to ensure it overlaps neighbors */
   }
 
   &:focus-visible {
@@ -50,7 +50,7 @@
     display: block;
     will-change: transform;
     position: relative; /* create stacking context for z-index */
-    z-index: 1010; /* default image stacking above card content */
+   // z-index: 101; /* default image stacking above card content */
     pointer-events: auto; /* image can still receive interactions if needed */
     transform-origin: center top;
   }
@@ -59,7 +59,7 @@
   .artwork-card:hover & img,
   .artwork-card:focus-visible & img {
     transform: translateY(-8px) scale(1.14);
-    z-index: 1100; /* sit above card content and neighbors */
+    //z-index: 999; /* sit above card content and neighbors */
     box-shadow: 0 1.25rem 3rem rgba(0,0,0,0.5);
   }
 
@@ -96,10 +96,6 @@
   align-items: center;
   gap: 0.25rem;
   z-index: 220; /* ensure badge stays above image when needed */
-
-  .material-icons-two-tone {
-    font-size: 0.875rem;
-  }
 }
 
 .card-content {

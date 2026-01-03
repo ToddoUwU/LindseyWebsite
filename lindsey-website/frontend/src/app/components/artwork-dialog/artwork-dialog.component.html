@@ -92,7 +92,8 @@
             @if (getCategories().length > 0) {
               <div class="artwork-category">
                 <mat-icon>category</mat-icon>
-                {{ getCategories().join(', ') }}
+                <p>
+                {{ getCategories().join(', ') }}</p>
               </div>
             }
 
@@ -115,7 +116,7 @@
                   <span class="price-label">Original Artwork</span>
                   <span class="price">${{ artwork()!.originalPrice | number }}</span>
                 </div>
-                <button mat-flat-button color="primary" class="inquire-button">
+                <button mat-flat-button color="primary" class="inquire-button" (click)="showInquiryDialog()">
                   <mat-icon>mail</mat-icon>
                   Inquire About Original
                 </button>
@@ -172,3 +173,5 @@
     </div>
   </div>
 }
+
+<app-inquiry-dialog></app-inquiry-dialog>

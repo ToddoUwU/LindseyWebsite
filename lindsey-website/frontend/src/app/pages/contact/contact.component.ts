@@ -1,6 +1,7 @@
 import {Component, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {ContactService} from '../../services/contact.service';
 
 @Component({
   selector: 'app-contact',
@@ -21,6 +22,8 @@ export class ContactComponent {
   readonly submitSuccess = signal(false);
   readonly submitError = signal(false);
 
+  constructor(private contactService: ContactService) {}
+
   updateField(field: string, event: Event): void {
     const value = (event.target as HTMLInputElement | HTMLTextAreaElement).value;
     this.formData.update(data => ({
@@ -35,9 +38,8 @@ export class ContactComponent {
     this.submitSuccess.set(false);
     this.submitError.set(false);
 
-    // Simulate form submission
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await this.contactService.submitContact(this.formData()).toPromise();
       this.submitSuccess.set(true);
       this.formData.set({
         name: '',
@@ -45,7 +47,8 @@ export class ContactComponent {
         subject: '',
         message: ''
       });
-    } catch {
+    } catch (error) {
+      console.error('Contact submission failed:', error);
       this.submitError.set(true);
     } finally {
       this.isSubmitting.set(false);

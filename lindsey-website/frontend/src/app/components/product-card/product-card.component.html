@@ -21,12 +21,12 @@
     />
     @if (!product().isAvailable) {
       <div class="out-of-stock-badge">
-        <span class="material-icons-two-tone">remove_shopping_cart</span>
+        <mat-icon>remove_shopping_cart</mat-icon>
         Out of Stock
       </div>
     }
     <div class="category-badge">
-      <span class="material-icons-two-tone">{{ getCategoryIcon() }}</span>
+      <mat-icon>{{ getCategoryIcon() }}</mat-icon>
     </div>
   </div>
   <div class="card-content">
@@ -46,7 +46,7 @@
         [disabled]="!product().isAvailable"
         class="view-button"
         type="button">
-        <span class="material-icons-two-tone">storefront</span>
+        <mat-icon>storefront</mat-icon>
         Buy Now
       </button>
     </div>
