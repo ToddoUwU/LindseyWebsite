@@ -3,10 +3,9 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {ArtworkService} from '../../services/artwork.service';
-import {ProductService} from '../../services/product.service';
-import {ArtworkProduct} from '../../models/api.model';
 import {environment} from '../../../environments/environment';
 import {InquiryDialogComponent} from '../inquiry-dialog/inquiry-dialog';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-artwork-dialog',
@@ -17,25 +16,20 @@ import {InquiryDialogComponent} from '../inquiry-dialog/inquiry-dialog';
 })
 export class ArtworkDialogComponent {
   readonly isClosing = signal(false);
-  readonly artworkProducts = signal<ArtworkProduct[]>([]);
-  readonly loadingProducts = signal(false);
   readonly showFullSize = signal(false);
 
   @ViewChild(InquiryDialogComponent) inquiryDialog!: InquiryDialogComponent;
 
   private artworkService = inject(ArtworkService);
-  private productService = inject(ProductService);
+  private router = inject(Router);
   readonly artwork = this.artworkService.selectedArtwork;
 
   constructor() {
-    // Load products when artwork changes
+    // Reset to medium when artwork changes
     effect(() => {
       const artwork = this.artwork();
       if (artwork) {
-        this.loadProducts(artwork.id);
-        this.showFullSize.set(false); // Reset to medium when artwork changes
-      } else {
-        this.artworkProducts.set([]);
+        this.showFullSize.set(false);
       }
     });
   }
@@ -96,30 +90,6 @@ export class ArtworkDialogComponent {
   }
 
   /**
-   * Load products for the current artwork
-   */
-  private loadProducts(artworkId: number): void {
-    this.loadingProducts.set(true);
-    this.productService.getProductsByArtworkId(artworkId).subscribe({
-      next: (products) => {
-        this.artworkProducts.set(products);
-        this.loadingProducts.set(false);
-      },
-      error: () => {
-        this.artworkProducts.set([]);
-        this.loadingProducts.set(false);
-      }
-    });
-  }
-
-  /**
-   * Open product URL
-   */
-  openProduct(product: ArtworkProduct): void {
-    window.open(product.productUrl, '_blank', 'noopener,noreferrer');
-  }
-
-  /**
    * Get medium image URL (default for dialog)
    */
   getMediumImageUrl(): string {
@@ -170,13 +140,6 @@ export class ArtworkDialogComponent {
   }
 
   /**
-   * Get current image URL based on view mode
-   */
-  getCurrentImageUrl(): string {
-    return this.showFullSize() ? this.getLargeImageUrl() : this.getMediumImageUrl();
-  }
-
-  /**
    * Parse categories from comma-delimited string
    */
   getCategories(): string[] {
@@ -195,18 +158,25 @@ export class ArtworkDialogComponent {
   }
 
   /**
-   * Get icon for product category
-   */
-  getProductIcon(category: string): string {
-    return this.productService.getCategoryIcon(category);
-  }
-
-  /**
    * Show inquiry dialog for original artwork
    */
   showInquiryDialog(): void {
     if (this.inquiryDialog) {
       this.inquiryDialog.show();
+    }
+  }
+
+  /**
+   * Navigate to the shop page with query parameters
+   */
+  goToShop(): void {
+    const artwork = this.artwork();
+    if (artwork) {
+      this.router.navigate(['/shop'], {
+        queryParams: {
+          artwork: artwork.id
+        }
+      });
     }
   }
 }

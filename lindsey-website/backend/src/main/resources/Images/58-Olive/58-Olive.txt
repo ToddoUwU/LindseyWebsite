@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	8"x10"
 
+Valid Ratios
+    8x10, 11x14, 12x15, 14x18, 16x20, 20x25, 22x28, 24x30, 28x36, 36x45, 40x50
+
+
 Medium
 	Acrylic on canvas
 

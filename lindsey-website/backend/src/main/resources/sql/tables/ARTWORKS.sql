@@ -22,10 +22,13 @@ CREATE TABLE IF NOT EXISTS ARTWORKS (
     is_featured BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    content_hash VARCHAR(64)
+    content_hash VARCHAR(64),
+    valid_ratios TEXT
 );
 
 -- Create indexes for faster searching
 CREATE INDEX IF NOT EXISTS idx_artwork_title ON ARTWORKS(title);
 CREATE INDEX IF NOT EXISTS idx_artwork_medium ON ARTWORKS(medium);
 CREATE INDEX IF NOT EXISTS idx_artwork_date ON ARTWORKS(date_produced);
+
+COMMENT ON COLUMN ARTWORKS.valid_ratios IS 'Comma-delimited list of valid print sizes that match the artwork ratio (e.g., "11x14,14x18,22x28")';

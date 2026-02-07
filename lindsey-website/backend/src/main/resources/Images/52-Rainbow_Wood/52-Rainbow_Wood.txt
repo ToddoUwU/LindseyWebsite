@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	5"x7"
 
+Valid Ratios
+    5x7, 5.1x7.1, 16x22, 20x28, 32x44, 36x50, 39.4x55.1
+
+
 Medium
 	Acrylic on canvas
 

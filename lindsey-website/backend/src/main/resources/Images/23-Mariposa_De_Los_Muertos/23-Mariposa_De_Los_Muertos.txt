@@ -11,6 +11,7 @@ Medium
 Dimensions
 	12"x18"
 
+
 SmallImage
 
 LargeImage

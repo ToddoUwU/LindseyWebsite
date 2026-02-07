@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	11"x14"
 
+Valid Ratios
+    7.9x9.8, 8x10, 11x14, 12x15, 16x20, 20x25, 22x28, 24x30, 36x45, 40x50
+
+
 Medium
 	Acrylic on gesso textured Bristol paper
 

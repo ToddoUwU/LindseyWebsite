@@ -1,6 +1,6 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {RouterLink} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ProductService} from '../../services/product.service';
 import {ProductCardComponent} from '../../components/product-card/product-card.component';
 import {ArtworkProduct} from '../../models/api.model';
@@ -14,14 +14,20 @@ import {ArtworkProduct} from '../../models/api.model';
 })
 export class ShopComponent implements OnInit {
   private productService = inject(ProductService);
+  private route = inject(ActivatedRoute);
 
   readonly shopPageData = this.productService.shopPageData;
   readonly loading = this.productService.loading;
   readonly error = this.productService.error;
   readonly selectedCategory = signal<string | null>(null);
+  readonly selectedArtworkId = signal<number | null>(null);
 
   readonly filteredProducts = computed(() => {
-    const products = this.shopPageData()?.products ?? [];
+    let products = this.shopPageData()?.products ?? [];
+    const artworkId = this.selectedArtworkId();
+    if (artworkId !== null) {
+      products = products.filter(p => p.artworkId === artworkId);
+    }
     return this.productService.filterByCategory(products, this.selectedCategory());
   });
 
@@ -43,6 +49,18 @@ export class ShopComponent implements OnInit {
 
   ngOnInit(): void {
     this.productService.getShopPageData().subscribe();
+
+    // Subscribe to query parameters for initial category filter
+    this.route.queryParams.subscribe(params => {
+      const category = params['category'];
+      const artworkId = params['artworkId'];
+      if (category) {
+        this.selectedCategory.set(category);
+      }
+      if (artworkId) {
+        this.selectedArtworkId.set(+artworkId);
+      }
+    });
   }
 
   onCategorySelect(category: string | null): void {
@@ -64,4 +82,3 @@ export class ShopComponent implements OnInit {
     return products.filter(p => p.productCategory.toLowerCase() === category.toLowerCase()).length;
   }
 }
-

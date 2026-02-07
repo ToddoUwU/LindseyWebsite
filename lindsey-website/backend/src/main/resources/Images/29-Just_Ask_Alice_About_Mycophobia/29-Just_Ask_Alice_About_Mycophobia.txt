@@ -8,6 +8,7 @@ ArtDescription
 Dimensions
 	18"x24"
 
+
 Medium
 	Pen and ink on watercolor paper
 

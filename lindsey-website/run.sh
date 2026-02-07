@@ -36,18 +36,161 @@ case $COMMAND in
         fi
         # Check if credentials are set
         source .env.dev
-        if [ -z "$POSTGRES_USER" ] || [ -z "$POSTGRES_PASSWORD" ]; then
-            echo -e "${RED}Error: POSTGRES_USER or POSTGRES_PASSWORD not set in .env.dev${NC}"
-            exit 1
+        # Check and export all variables from .env.dev
+        if [ -z "$POSTGRES_USER" ]; then
+          echo -e "${RED}Error: POSTGRES_USER not set in .env.dev${NC}";
+          exit 1;
         fi
+        export POSTGRES_USER
+
+        if [ -z "$POSTGRES_PASSWORD" ]; then
+          echo -e "${RED}Error: POSTGRES_PASSWORD not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export POSTGRES_PASSWORD
+
+        if [ -z "$POSTGRES_DB" ]; then
+          echo -e "${RED}Error: POSTGRES_DB not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export POSTGRES_DB
+
+        if [ -z "$SPRING_PROFILES_ACTIVE" ]; then
+          echo -e "${RED}Error: SPRING_PROFILES_ACTIVE not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_PROFILES_ACTIVE
+
+        if [ -z "$SPRING_DATASOURCE_URL" ]; then
+          echo -e "${RED}Error: SPRING_DATASOURCE_URL not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_DATASOURCE_URL
+
+        if [ -z "$SPRING_DATASOURCE_USERNAME" ]; then
+          echo -e "${RED}Error: SPRING_DATASOURCE_USERNAME not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_DATASOURCE_USERNAME
+
+        if [ -z "$SPRING_DATASOURCE_PASSWORD" ]; then
+          echo -e "${RED}Error: SPRING_DATASOURCE_PASSWORD not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_DATASOURCE_PASSWORD
+
+        if [ -z "$SPRING_JPA_HIBERNATE_DDL_AUTO" ]; then
+          echo -e "${RED}Error: SPRING_JPA_HIBERNATE_DDL_AUTO not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_JPA_HIBERNATE_DDL_AUTO
+
+        if [ -z "$SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT" ]; then
+          echo -e "${RED}Error: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+
+        if [ -z "$SPRING_JPA_OPEN_IN_VIEW" ]; then
+          echo -e "${RED}Error: SPRING_JPA_OPEN_IN_VIEW not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_JPA_OPEN_IN_VIEW
+
+        if [ -z "$SPRING_JPA_SHOW_SQL" ]; then
+          echo -e "${RED}Error: SPRING_JPA_SHOW_SQL not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_JPA_SHOW_SQL
+
+        if [ -z "$ENVIRONMENT" ]; then
+          echo -e "${RED}Error: ENVIRONMENT not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export ENVIRONMENT
+
+        if [ -z "$HTTPS_PORT" ]; then
+          echo -e "${RED}Error: HTTPS_PORT not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export HTTPS_PORT
+
+        if [ -z "$DB_PORT" ]; then
+          echo -e "${RED}Error: DB_PORT not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export DB_PORT
+
+        if [ -z "$LOG_LEVEL" ]; then
+          echo -e "${RED}Error: LOG_LEVEL not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export LOG_LEVEL
+
+        if [ -z "$DB_RECREATE_TABLES" ]; then
+          echo -e "${RED}Error: DB_RECREATE_TABLES not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export DB_RECREATE_TABLES
+
+        if [ -z "$SSL_KEYSTORE_PATH" ]; then
+          echo -e "${RED}Error: SSL_KEYSTORE_PATH not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SSL_KEYSTORE_PATH
+
+        if [ -z "$SSL_KEYSTORE_PASSWORD" ]; then
+          echo -e "${RED}Error: SSL_KEYSTORE_PASSWORD not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SSL_KEYSTORE_PASSWORD
+
+        if [ -z "$SSL_KEY_ALIAS" ]; then
+          echo -e "${RED}Error: SSL_KEY_ALIAS not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SSL_KEY_ALIAS
+
+        if [ -z "$EXTERNAL_API_LUMAPRINTS_API_KEY" ]; then
+          echo -e "${RED}Error: EXTERNAL_API_LUMAPRINTS_API_KEY not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export EXTERNAL_API_LUMAPRINTS_API_KEY
+
+        if [ -z "$EXTERNAL_API_LUMAPRINTS_API_SECRET" ]; then
+          echo -e "${RED}Error: EXTERNAL_API_LUMAPRINTS_API_SECRET not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export EXTERNAL_API_LUMAPRINTS_API_SECRET
+
+        if [ -z "$EXTERNAL_API_ARTELLO_API_KEY" ]; then
+          echo -e "${RED}Error: EXTERNAL_API_ARTELLO_API_KEY not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export EXTERNAL_API_ARTELLO_API_KEY
+
+        if [ -z "$EXTERNAL_API_USE_SANDBOX" ]; then
+          echo -e "${RED}Error: EXTERNAL_API_USE_SANDBOX not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export EXTERNAL_API_USE_SANDBOX
+
+        if [ -z "$SPRING_MAIL_USERNAME" ]; then
+          echo -e "${RED}Error: SPRING_MAIL_USERNAME not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_MAIL_USERNAME
+
+        if [ -z "$SPRING_MAIL_PASSWORD" ]; then
+          echo -e "${RED}Error: SPRING_MAIL_PASSWORD not set in .env.dev${NC}";
+          exit 1;
+        fi
+        export SPRING_MAIL_PASSWORD
+
         # Check for SSL keystore
         if [ ! -f "certs/keystore.p12" ]; then
             echo -e "${YELLOW}Warning: No SSL certificate found!${NC}"
             echo "Run './run.sh cert' to generate a self-signed certificate first."
-            exit 1
-        fi
-        if [ -z "$SSL_KEYSTORE_PASSWORD" ]; then
-            echo -e "${RED}Error: SSL_KEYSTORE_PASSWORD not set in .env.dev${NC}"
             exit 1
         fi
         $DOCKER_COMPOSE --env-file .env.dev up "$@"
@@ -89,7 +232,7 @@ case $COMMAND in
     rebuild)
         ENV=${1:-dev}
         echo -e "${YELLOW}Rebuilding $ENV environment...${NC}"
-        $DOCKER_COMPOSE --env-file .env.$ENV build --no-cache
+        $DOCKER_COMPOSE --env-file .env."$ENV" build --no-cache
         ;;
 
     cert)

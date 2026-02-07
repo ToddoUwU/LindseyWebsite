@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	9"x12"
 
+Valid Ratios
+    6x8, 9x12, 12x16, 17x23, 17.7x23.6, 18x24, 22x30, 24x32, 28x38, 30x40, 36x48
+
+
 Medium
 	Watercolor
 

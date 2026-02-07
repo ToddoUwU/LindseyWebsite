@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -7,6 +7,7 @@ import {ArtworkService} from '../../services/artwork.service';
 import {ArtworkCardComponent} from '../../components/artwork-card/artwork-card.component';
 import {ArtworkDialogComponent} from '../../components/artwork-dialog/artwork-dialog.component';
 import {ArtworkFilterComponent} from '../../components/artwork-filter/artwork-filter.component';
+import {Carousel} from '../../components/carousel/carousel';
 import {Artwork, ArtworkFilters} from '../../models/api.model';
 import {environment} from '../../../environments/environment';
 import {FilterService} from '../../services/filter.service';
@@ -22,22 +23,19 @@ import {FilterService} from '../../services/filter.service';
     MatProgressSpinnerModule,
     ArtworkCardComponent,
     ArtworkDialogComponent,
-    ArtworkFilterComponent
+    ArtworkFilterComponent,
+    Carousel
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit {
   private artworkService = inject(ArtworkService);
   private filterService = inject(FilterService);
 
   readonly homePageData = this.artworkService.homePageData;
   readonly loading = this.artworkService.loading;
   readonly error = this.artworkService.error;
-
-  // Featured slider state
-  readonly currentSlideIndex = signal(0);
-  private slideInterval: ReturnType<typeof setInterval> | null = null;
 
   // Filter state from service
   readonly activeFilters = this.filterService.activeFilters;
@@ -104,90 +102,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Load home page data from API
-    this.artworkService.getHomePageData().subscribe(() => {
-      // Start auto-slide after data loads
-      this.startAutoSlide();
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.stopAutoSlide();
-  }
-
-  // ==================== Featured Slider Methods ====================
-
-  startAutoSlide(): void {
-    this.stopAutoSlide();
-    this.slideInterval = setInterval(() => {
-      this.nextSlide();
-    }, 5000); // Change slide every 5 seconds
-  }
-
-  stopAutoSlide(): void {
-    if (this.slideInterval) {
-      clearInterval(this.slideInterval);
-      this.slideInterval = null;
-    }
-  }
-
-  nextSlide(): void {
-    const total = this.featuredArtworks().length;
-    if (total === 0) return;
-    this.currentSlideIndex.set((this.currentSlideIndex() + 1) % total);
-  }
-
-  prevSlide(): void {
-    const total = this.featuredArtworks().length;
-    if (total === 0) return;
-    this.currentSlideIndex.set((this.currentSlideIndex() - 1 + total) % total);
-  }
-
-  goToSlide(index: number): void {
-    this.currentSlideIndex.set(index);
-    // Reset auto-slide timer when manually navigating
-    this.startAutoSlide();
-  }
-
-  onSliderMouseEnter(): void {
-    this.stopAutoSlide();
-  }
-
-  onSliderMouseLeave(): void {
-    this.startAutoSlide();
-  }
-
-  // ==================== Carousel Helper Methods ====================
-
-  isPrevSlide(index: number): boolean {
-    const total = this.featuredArtworks().length;
-    if (total <= 1) return false;
-    const current = this.currentSlideIndex();
-    return index === (current - 1 + total) % total;
-  }
-
-  isNextSlide(index: number): boolean {
-    const total = this.featuredArtworks().length;
-    if (total <= 1) return false;
-    const current = this.currentSlideIndex();
-    return index === (current + 1) % total;
-  }
-
-  isVisibleSlide(index: number): boolean {
-    return this.currentSlideIndex() === index || this.isPrevSlide(index) || this.isNextSlide(index);
-  }
-
-  onCarouselItemClick(index: number, artwork: Artwork): void {
-    if (this.currentSlideIndex() === index) {
-      // Click on active slide opens the dialog
-      this.artworkService.selectArtwork(artwork);
-    } else {
-      // Click on side slide navigates to it
-      this.goToSlide(index);
-    }
+    this.artworkService.getHomePageData().subscribe();
   }
 
   // ==================== Artwork Selection ====================
-
 
   onArtworkSelected(artwork: Artwork): void {
     this.artworkService.selectArtwork(artwork);
@@ -204,15 +122,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // ==================== Utility Methods ====================
-
-  getSmallImageUrl(artwork: Artwork): string {
-    const url = artwork.smallImageUrl;
-    if (url?.startsWith('http://') || url?.startsWith('https://')) {
-      return url;
-    }
-    return `${environment.imageBaseUrl}${url}`;
-  }
-
 
   getActiveFilterSummary(): string {
     const filters = this.activeFilters();

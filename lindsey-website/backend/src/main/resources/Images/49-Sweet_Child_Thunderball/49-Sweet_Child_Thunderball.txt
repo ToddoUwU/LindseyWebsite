@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	6"x8"
 
+Valid Ratios
+    20x36
+
+
 Medium
 	acrylic on wood plaque
 

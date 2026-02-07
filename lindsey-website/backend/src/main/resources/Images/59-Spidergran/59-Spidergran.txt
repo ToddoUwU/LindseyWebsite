@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	16"x20"
 
+Valid Ratios
+    9x11, 18x22, 20x24
+
+
 Medium
 	Acrylic on canvas
 

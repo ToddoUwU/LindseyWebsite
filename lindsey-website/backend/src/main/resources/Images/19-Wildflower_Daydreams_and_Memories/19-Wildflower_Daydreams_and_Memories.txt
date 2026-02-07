@@ -8,6 +8,7 @@ ArtDescription
 Dimensions
 	20"x30"
 
+
 Medium
 	Colored pencil on matte board
 

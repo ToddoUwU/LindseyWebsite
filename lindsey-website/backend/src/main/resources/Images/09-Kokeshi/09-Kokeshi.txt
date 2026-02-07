@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	13"x19"
 
+Valid Ratios
+    11x17, 22x34, 26x40
+
+
 Medium
 	Pastel on colored drawing paper
 

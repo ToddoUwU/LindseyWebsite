@@ -31,19 +31,18 @@
           <div class="full-size-controls">
             <button
               mat-fab
-              extended
               (click)="toggleFullSize()"
               class="back-button">
               <mat-icon>arrow_back</mat-icon>
-              Back to Details
+              Back
             </button>
             <button
               mat-fab
-              extended
               (click)="openFullSizeInNewTab()"
+              (dblclick)="openFullSizeInNewTab()"
               class="new-tab-button">
               <mat-icon>open_in_new</mat-icon>
-              Open in New Tab
+              New Tab
             </button>
           </div>
         </div>
@@ -58,6 +57,13 @@
               tabindex="0"
               role="button"
               aria-label="Click to view full size image">
+              <button
+                mat-fab
+                (click)="goToShop()"
+                aria-label="Go to shop for this artwork"
+                class="shop-button">
+                <mat-icon>shop</mat-icon>
+              </button>
               <img
                 [alt]="artwork()!.title"
                 [ngSrc]="getMediumImageUrl()"
@@ -123,50 +129,13 @@
               }
             </div>
 
-            <!-- Simple Print Link (if available) -->
-            @if (artwork()!.linkToPrint) {
-              <a
-                mat-stroked-button
-                [href]="artwork()!.linkToPrint"
-                class="print-link"
-                target="_blank"
-                rel="noopener">
-                <mat-icon>print</mat-icon>
-                Order Print
-              </a>
-            }
-
-            <!-- Available Products Section -->
-            @if (artworkProducts().length > 0) {
-              <div class="products-section">
-                <h3 class="products-title">
-                  <mat-icon>storefront</mat-icon>
-                  Available Products
-                </h3>
-                <div class="products-list">
-                  @for (product of artworkProducts(); track product.id) {
-                    <button
-                      mat-stroked-button
-                      (click)="openProduct(product)"
-                      class="product-item">
-                      <mat-icon class="product-icon">{{ getProductIcon(product.productCategory) }}</mat-icon>
-                      <span class="product-info">
-                        <span class="product-name">{{ product.description }}</span>
-                        @if (product.price) {
-                          <span class="product-price">${{ product.price | number }}</span>
-                        }
-                      </span>
-                      <mat-icon>open_in_new</mat-icon>
-                    </button>
-                  }
-                </div>
-              </div>
-            } @else if (loadingProducts()) {
-              <div class="products-loading">
-                <mat-icon class="spinning">sync</mat-icon>
-                Loading products...
-              </div>
-            }
+            <!-- Shop Button Section -->
+            <div class="shop-full-button-section">
+              <button mat-flat-button class="shop-full-button" (click)="goToShop()">
+                <mat-icon>shop</mat-icon>
+                Shop Prints and More!
+              </button>
+            </div>
           </div>
         </div>
       }

@@ -135,6 +135,36 @@
     outline: 3px solid var(--mat-sys-primary);
     outline-offset: 2px;
   }
+
+  .shop-button {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 11;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--mat-sys-corner-full, 100px);
+    border: none;
+    background-color: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    opacity: 0.6;
+
+    &:hover {
+      background-color: var(--mat-sys-surface-container-highest);
+      transform: scale(1.05);
+      opacity: 1;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+    }
+  }
 }
 
 .image-overlay {
@@ -202,19 +232,68 @@
 
 .full-size-controls {
   display: flex;
-  gap: 1rem;
+  gap: 0;
+  justify-content: center;
+  align-items: center;
   margin-top: 1.5rem;
+  flex-wrap: nowrap;
+  width: 50%;
+}
+
+.back-button, .new-tab-button {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
+  width: 50%;
+  white-space: nowrap;
+  padding: 0.75rem 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mat-sys-corner-large, 16px);
+  margin: 0;
+}
+
+.back-button {
+  margin-right: 0.5rem;
+}
+
+.new-tab-button {
+  margin-left: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .full-size-controls {
+    margin-top: 1rem;
+    width: 100%;
+  }
+  .back-button, .new-tab-button {
+    font-size: 0.95rem;
+    padding: 0.75rem 0;
+    width: 50%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+  }
+  .back-button {
+    margin-right: 0.25rem;
+  }
+  .new-tab-button {
+    margin-left: 0.25rem;
+  }
 }
 
 .info-section {
   flex: 0 0 380px;
   padding: 1rem;
-  padding-top: 4.5rem; // Account for close button
+  padding-top: 4rem; // Account for close button
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   overflow-y: auto;
   background-color: var(--mat-sys-surface);
+  position: relative;
 }
 
 .artwork-title {
@@ -460,13 +539,77 @@
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
 
+  mat-icon {
+    color: var(--mat-sys-on-primary);
+  }
+
   &:hover {
     background-color: var(--mat-sys-primary-container);
     color: var(--mat-sys-on-primary-container);
+
+    mat-icon {
+      color: var(--mat-sys-on-primary-container);
+    }
   }
 
   &:focus-visible {
     outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
+}
+
+.shop-full-button-section {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--mat-sys-surface);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 20;
+  padding-top: 1rem;
+  padding-bottom: 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.shop-full-button {
+  position: static;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-radius: var(--mat-sys-corner-large, 16px);
+  border: none;
+  background-color: var(--mat-sys-secondary);
+  color: var(--mat-sys-on-secondary);
+  font-family: var(--mat-sys-label-large-font, sans-serif);
+  font-size: var(--mat-sys-label-large-size, 0.875rem);
+  font-weight: var(--mat-sys-label-large-weight, 500);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+
+  mat-icon {
+    color: var(--mat-sys-on-secondary);
+  }
+
+  &:hover {
+    background-color: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    transform: scale(1.02);
+
+    mat-icon {
+      color: var(--mat-sys-on-secondary-container);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-secondary);
     outline-offset: 2px;
   }
 }
@@ -502,8 +645,13 @@
 
   .info-section {
     flex: 1;
-    padding: 1rem;
-    padding-top: 1rem;
+    padding: 0 1rem 0 1rem;
+    padding-top: 0;
+    padding-bottom: 0;
+    width: 100vw;
+    max-width: 100vw;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .artwork-title {
@@ -529,6 +677,22 @@
 
   .products-section {
     margin-top: 1rem;
+  }
+
+  .shop-full-button-section {
+    left: 0;
+    right: 0;
+    max-width: 100vw;
+    padding: 0;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .shop-full-button {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    margin: 0;
   }
 }
 

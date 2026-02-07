@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	11"x14"
 
+Valid Ratios
+    6x8, 9x12, 12x16, 13x17, 17x23, 17.7x23.6, 18x24, 24x32, 26x34, 28x38, 30x40, 32x42, 36x48
+
+
 Medium
 	Colored pencil on Bristol board
 

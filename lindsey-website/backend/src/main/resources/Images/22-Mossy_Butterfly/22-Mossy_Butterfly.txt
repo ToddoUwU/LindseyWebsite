@@ -8,6 +8,7 @@ ArtDescription
 Dimensions
 	8"x10"
 
+
 Medium
 	Mixed media layered paper and acrylic on canvas
 

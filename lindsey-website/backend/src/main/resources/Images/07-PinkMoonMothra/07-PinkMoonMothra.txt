@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	24"x36"
 
+Valid Ratios
+    4x6, 8x12, 11x17, 12x18, 16x24, 18x27, 20x30, 22x34, 23.6x35.4, 24x36, 26x40, 32x48, 36x54, 40x60
+
+
 Medium
 	Acrylic on Canvas and metal flakes
 

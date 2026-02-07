@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	8.5"x11"
 
+Valid Ratios
+    8.5x11, 10x13, 11x14, 13x17, 14x18, 20x26, 22x28, 26x34, 28x36, 32x42
+
+
 Medium
 	Guoache and colored pencil on watercolor paper
 

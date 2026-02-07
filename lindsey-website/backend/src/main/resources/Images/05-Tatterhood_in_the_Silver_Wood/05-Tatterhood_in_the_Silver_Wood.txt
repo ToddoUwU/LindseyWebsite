@@ -8,6 +8,7 @@ ArtDescription
 Dimensions
 	16"x20"
 
+
 Medium
 	Oil on Canvas
 

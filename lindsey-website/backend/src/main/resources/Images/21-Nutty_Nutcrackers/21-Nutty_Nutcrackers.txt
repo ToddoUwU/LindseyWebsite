@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	10"x17"
 
+Valid Ratios
+    16x30, 24x45
+
+
 Medium
 	marker on Bristol board
 

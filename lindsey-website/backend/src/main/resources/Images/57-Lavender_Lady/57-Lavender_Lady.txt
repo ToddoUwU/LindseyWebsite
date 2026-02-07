@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	6"x8"
 
+Valid Ratios
+    5x7, 5.1x7.1, 14x20, 16x22, 19x27, 20x28, 21x30, 28x40, 32x44, 36x50, 39.4x55.1
+
+
 Medium
 	Watercolor
 

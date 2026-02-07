@@ -8,6 +8,7 @@ ArtDescription
 Dimensions
 	13"x16"
 
+
 Medium
 	graphite on Bristol board
 

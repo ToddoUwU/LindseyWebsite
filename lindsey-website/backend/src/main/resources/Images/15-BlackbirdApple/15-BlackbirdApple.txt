@@ -8,6 +8,7 @@ ArtDescription
 Dimensions
 	12"x12" 
 
+
 Medium
 	Colored pencil on black matte board
 

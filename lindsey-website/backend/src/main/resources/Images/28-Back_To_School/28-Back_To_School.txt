@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	18"x24"
 
+Valid Ratios
+    7.9x9.8, 8x10, 9x11, 12x15, 16x20, 18x22, 20x25, 24x30, 36x45, 40x50
+
+
 Medium
 	Charcoal pencil on colored drawing paper
 

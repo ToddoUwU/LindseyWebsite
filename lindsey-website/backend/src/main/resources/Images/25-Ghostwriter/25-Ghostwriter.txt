@@ -8,6 +8,10 @@ ArtDescription
 Dimensions
 	11"x14"
 
+Valid Ratios
+    4x6, 8x12, 12x18, 13x19, 16x24, 18x27, 20x30, 23.6x35.4, 24x36, 27x40, 32x48, 36x54, 40x60
+
+
 Medium
 	watercolor
 

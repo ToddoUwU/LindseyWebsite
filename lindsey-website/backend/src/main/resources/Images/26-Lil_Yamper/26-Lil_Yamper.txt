@@ -11,6 +11,10 @@ Medium
 Dimensions
 	5"x7"
 
+Valid Ratios
+    9x11, 18x22, 20x24
+
+
 SmallImage
 
 LargeImage
