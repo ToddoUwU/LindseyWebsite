@@ -1,24 +1,23 @@
 package com.lindseyayresart.lindseywebsite.Controller;
 
+import com.lindseyayresart.lindseywebsite.Model.ArtworkProduct;
+import com.lindseyayresart.lindseywebsite.Services.ArtworkProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.lindseyayresart.lindseywebsite.Model.ArtworkProduct;
-import com.lindseyayresart.lindseywebsite.Services.ArtworkProductService;
 
 import java.util.List;
 import java.util.Set;
 
 /**
  * REST Controller for artwork product endpoints.
- * 
+ * <p>
  * Products are items that can be purchased based on an artwork:
  * - Prints (various sizes)
  * - Canvas prints
  * - Merchandise (mugs, shirts, etc. via Printify)
- * 
+ * <p>
  * Endpoints:
  * - GET /api/artwork/{id}/products - Products for a specific artwork
  * - GET /api/products/categories - All product categories
@@ -28,13 +27,35 @@ import java.util.Set;
 @RequestMapping("/api")
 @CrossOrigin(origins = {"http://localhost:4200", "${ALLOWED_ORIGINS:}"})
 public class ArtworkProductController {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ArtworkProductController.class);
-    
+
     private final ArtworkProductService productService;
 
     public ArtworkProductController(ArtworkProductService productService) {
         this.productService = productService;
+    }
+
+    // ============================================================
+    // All Products
+    // ============================================================
+
+    /**
+     * GET /api/products
+     * Returns all available products.
+     */
+    @GetMapping("/products")
+    public ResponseEntity<List<ArtworkProduct>> getAllProducts() {
+        logger.info("GET /api/products - Fetching all available products");
+
+        try {
+            List<ArtworkProduct> products = productService.getAllAvailableProducts();
+            logger.info("Returning {} products", products.size());
+            return ResponseEntity.ok(products);
+        } catch (Exception e) {
+            logger.error("Error fetching all products", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     // ============================================================
@@ -110,7 +131,7 @@ public class ArtworkProductController {
     @GetMapping("/artwork/{artworkId}/products/count")
     public ResponseEntity<Long> getProductCount(@PathVariable Long artworkId) {
         logger.debug("GET /api/artwork/{}/products/count", artworkId);
-        
+
         try {
             long count = productService.countAvailableProducts(artworkId);
             return ResponseEntity.ok(count);
@@ -127,7 +148,7 @@ public class ArtworkProductController {
     @GetMapping("/artwork/{artworkId}/products/exists")
     public ResponseEntity<Boolean> hasProducts(@PathVariable Long artworkId) {
         logger.debug("GET /api/artwork/{}/products/exists", artworkId);
-        
+
         try {
             boolean hasProducts = productService.hasAvailableProducts(artworkId);
             return ResponseEntity.ok(hasProducts);
@@ -148,7 +169,7 @@ public class ArtworkProductController {
      */
     @PostMapping("/artwork/{artworkId}/products")
     public ResponseEntity<ArtworkProduct> addProduct(
-            @PathVariable Long artworkId, 
+            @PathVariable Long artworkId,
             @RequestBody ArtworkProduct product) {
         logger.info("POST /api/artwork/{}/products - Adding product: {}", artworkId, product.getDescription());
 
@@ -171,7 +192,7 @@ public class ArtworkProductController {
      */
     @PutMapping("/products/{productId}")
     public ResponseEntity<ArtworkProduct> updateProduct(
-            @PathVariable Long productId, 
+            @PathVariable Long productId,
             @RequestBody ArtworkProduct product) {
         logger.info("PUT /api/products/{} - Updating product", productId);
 

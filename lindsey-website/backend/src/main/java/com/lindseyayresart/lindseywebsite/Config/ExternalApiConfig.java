@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuration for external API integrations.
- * 
+ * <p>
  * API keys and secrets are loaded from environment variables for security.
  * Never commit actual API keys to version control.
  */

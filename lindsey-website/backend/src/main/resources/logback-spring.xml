@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="LOGS" value="./logs" />
-    
+    <property name="LOGS" value="./logs"/>
+
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
@@ -12,19 +12,19 @@
 
     <!-- LOG everything at INFO level -->
     <root level="info">
-        <appender-ref ref="Console" />
+        <appender-ref ref="Console"/>
     </root>
-    
+
     <!-- Specific logging configurations -->
     <logger name="com.lindseyayresart.lindseywebsite" level="DEBUG" additivity="false">
-        <appender-ref ref="Console" />
+        <appender-ref ref="Console"/>
     </logger>
-    
+
     <logger name="com.lindseyayresart.lindseywebsite.Config" level="DEBUG" additivity="false">
-        <appender-ref ref="Console" />
+        <appender-ref ref="Console"/>
     </logger>
-    
+
     <logger name="org.springframework.jdbc" level="DEBUG" additivity="false">
-        <appender-ref ref="Console" />
+        <appender-ref ref="Console"/>
     </logger>
 </configuration>

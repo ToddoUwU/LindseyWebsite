@@ -8,4 +8,5 @@ public record OrderConfirmation(
         String variantDescription,
         BigDecimal totalAmount,
         String status
-) {}
+) {
+}

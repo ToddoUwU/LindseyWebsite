@@ -30,16 +30,14 @@ import java.util.Optional;
 public class ArtelloService {
 
 
-    private final ExternalApiConfig apiConfig;
-    private final RestClient restClient;
-
     private static final ParameterizedTypeReference<List<ArtelloProductSet>> PRODUCT_SET_LIST_TYPE =
             new ParameterizedTypeReference<>() {
             };
-
     private static final ParameterizedTypeReference<List<Map<String, Object>>> GENERIC_LIST_TYPE =
             new ParameterizedTypeReference<>() {
             };
+    private final ExternalApiConfig apiConfig;
+    private final RestClient restClient;
 
     public List<ArtelloProductSet> getProductSets(int limit) {
         return restClient.get()
@@ -61,8 +59,7 @@ public class ArtelloService {
                             throw new RuntimeException("Artello Service Unavailable");
                         }
                 )
-                .body(PRODUCT_SET_LIST_TYPE)
-                ;
+                .body(PRODUCT_SET_LIST_TYPE);
 
         return sets == null ? Optional.empty() : Optional.ofNullable(sets.getFirst());
     }

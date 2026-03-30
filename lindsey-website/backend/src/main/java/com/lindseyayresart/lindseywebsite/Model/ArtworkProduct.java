@@ -1,8 +1,10 @@
 package com.lindseyayresart.lindseywebsite.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,12 +13,12 @@ import java.time.LocalDateTime;
 
 /**
  * Entity representing a product associated with an artwork.
- * 
+ * <p>
  * Products can be:
  * - Prints (various sizes)
  * - Merchandise (mugs, shirts, etc. via Printify)
  * - Original artwork for sale
- * 
+ * <p>
  * One artwork can have many products (one-to-many relationship).
  */
 @Getter

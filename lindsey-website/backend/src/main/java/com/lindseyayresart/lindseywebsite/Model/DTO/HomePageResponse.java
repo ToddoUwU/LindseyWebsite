@@ -24,17 +24,17 @@ public class HomePageResponse implements Serializable {
      * Featured artworks with compressed images
      */
     private List<FeaturedArtworkDTO> featuredArtworks;
-    
+
     /**
      * All unique categories for filtering (sorted alphabetically)
      */
     private Set<String> categories;
-    
+
     /**
      * All unique years when artworks were produced (sorted descending)
      */
     private Set<Integer> years;
-    
+
     /**
      * All unique dimensions/sizes (sorted)
      */

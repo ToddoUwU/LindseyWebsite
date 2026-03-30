@@ -1,11 +1,9 @@
 package com.lindseyayresart.lindseywebsite.Repository;
 
+import com.lindseyayresart.lindseywebsite.Model.ArtworkProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import com.lindseyayresart.lindseywebsite.Model.ArtworkProduct;
 
 import java.util.List;
 import java.util.Set;
@@ -50,6 +48,11 @@ public interface ArtworkProductRepository extends JpaRepository<ArtworkProduct, 
      */
     @Query("SELECT DISTINCT p.productCategory FROM ArtworkProduct p WHERE p.productCategory IS NOT NULL ORDER BY p.productCategory ASC")
     Set<String> findAllProductCategories();
+
+    /**
+     * Get all available products.
+     */
+    List<ArtworkProduct> findByIsAvailableTrueOrderByArtworkTitleAsc();
 
     // ============================================================
     // Counts

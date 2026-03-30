@@ -1,16 +1,15 @@
 package com.lindseyayresart.lindseywebsite.Services;
 
+import com.lindseyayresart.lindseywebsite.Model.Artwork;
+import com.lindseyayresart.lindseywebsite.Model.ArtworkProduct;
+import com.lindseyayresart.lindseywebsite.Repository.ArtworkProductRepository;
+import com.lindseyayresart.lindseywebsite.Repository.ArtworkRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.lindseyayresart.lindseywebsite.Model.Artwork;
-import com.lindseyayresart.lindseywebsite.Model.ArtworkProduct;
-import com.lindseyayresart.lindseywebsite.Repository.ArtworkProductRepository;
-import com.lindseyayresart.lindseywebsite.Repository.ArtworkRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +35,14 @@ public class ArtworkProductService {
     // ============================================================
     // Read Operations
     // ============================================================
+
+    /**
+     * Get all available products across all artworks.
+     */
+    public List<ArtworkProduct> getAllAvailableProducts() {
+        logger.debug("Fetching all available products");
+        return productRepository.findByIsAvailableTrueOrderByArtworkTitleAsc();
+    }
 
     /**
      * Get all products for a specific artwork.
@@ -104,10 +111,10 @@ public class ArtworkProductService {
     @CacheEvict(value = "artworkProducts", key = "#artworkId")
     public ArtworkProduct addProduct(Long artworkId, ArtworkProduct product) {
         logger.info("Adding product '{}' to artwork ID: {}", product.getDescription(), artworkId);
-        
+
         Artwork artwork = artworkRepository.findById(artworkId)
                 .orElseThrow(() -> new IllegalArgumentException("Artwork not found with ID: " + artworkId));
-        
+
         product.setArtwork(artwork);
         return productRepository.save(product);
     }
@@ -119,10 +126,10 @@ public class ArtworkProductService {
     @CacheEvict(value = "artworkProducts", allEntries = true)
     public ArtworkProduct updateProduct(Long productId, ArtworkProduct updatedProduct) {
         logger.info("Updating product ID: {}", productId);
-        
+
         ArtworkProduct existing = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
-        
+
         existing.setDescription(updatedProduct.getDescription());
         existing.setProductCategory(updatedProduct.getProductCategory());
         existing.setProductUrl(updatedProduct.getProductUrl());
@@ -130,7 +137,7 @@ public class ArtworkProductService {
         existing.setIsAvailable(updatedProduct.getIsAvailable());
         existing.setDisplayOrder(updatedProduct.getDisplayOrder());
         existing.setProductImageUrl(updatedProduct.getProductImageUrl());
-        
+
         return productRepository.save(existing);
     }
 
@@ -151,10 +158,10 @@ public class ArtworkProductService {
     @CacheEvict(value = "artworkProducts", allEntries = true)
     public ArtworkProduct toggleAvailability(Long productId) {
         logger.info("Toggling availability for product ID: {}", productId);
-        
+
         ArtworkProduct product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + productId));
-        
+
         product.setIsAvailable(!product.getIsAvailable());
         return productRepository.save(product);
     }

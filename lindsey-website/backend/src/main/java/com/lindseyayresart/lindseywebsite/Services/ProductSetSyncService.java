@@ -34,6 +34,24 @@ public class ProductSetSyncService {
     // Self-injection to solve the @Transactional self-invocation issue
     private ProductSetSyncService self;
 
+    private static BigDecimal getFinalRetail(BigDecimal unitCost, BigDecimal shipping) {
+        BigDecimal totalCOGS = unitCost.add(shipping);
+
+        // 2. Adjust for Square Fees (approx 3%)
+        // If we don't account for the 3% Square takes, it eats into your 60% margin.
+        BigDecimal squareAdjustment = new BigDecimal("0.97");
+        BigDecimal costAdjustedForFees = totalCOGS.divide(squareAdjustment, 2, RoundingMode.HALF_UP);
+
+        // 3. Apply 40% Margin
+        // Formula: Retail = AdjustedCost / (1 - 0.40)
+        BigDecimal marginDivisor = new BigDecimal("0.60");
+        BigDecimal retail = costAdjustedForFees.divide(marginDivisor, 2, RoundingMode.HALF_UP);
+
+        // round to nearest .05 or .00 6.97-> 7.00, 7.03 -> 7.05
+        retail = retail.setScale(2, RoundingMode.HALF_UP);
+        return retail;
+    }
+
     @Autowired
     public void setSelf(@Lazy ProductSetSyncService self) {
         this.self = self;
@@ -118,23 +136,5 @@ public class ProductSetSyncService {
         variant.setFrameStyle(info.getFrameStyle());
 
         return variantRepository.save(variant);
-    }
-
-    private static BigDecimal getFinalRetail(BigDecimal unitCost, BigDecimal shipping) {
-        BigDecimal totalCOGS = unitCost.add(shipping);
-
-        // 2. Adjust for Square Fees (approx 3%)
-        // If we don't account for the 3% Square takes, it eats into your 60% margin.
-        BigDecimal squareAdjustment = new BigDecimal("0.97");
-        BigDecimal costAdjustedForFees = totalCOGS.divide(squareAdjustment, 2, RoundingMode.HALF_UP);
-
-        // 3. Apply 40% Margin
-        // Formula: Retail = AdjustedCost / (1 - 0.40)
-        BigDecimal marginDivisor = new BigDecimal("0.60");
-        BigDecimal retail = costAdjustedForFees.divide(marginDivisor, 2, RoundingMode.HALF_UP);
-
-        // round to nearest .05 or .00 6.97-> 7.00, 7.03 -> 7.05
-        retail = retail.setScale(2, RoundingMode.HALF_UP);
-        return retail;
     }
 }

@@ -1,9 +1,9 @@
 package com.lindseyayresart.lindseywebsite.Services;
 
-import com.lindseyayresart.lindseywebsite.Model.ArtelloPrintVariant;
 import com.lindseyayresart.lindseywebsite.Enums.OrderStatus;
-import com.lindseyayresart.lindseywebsite.Model.PrintOrder;
+import com.lindseyayresart.lindseywebsite.Model.ArtelloPrintVariant;
 import com.lindseyayresart.lindseywebsite.Model.DTO.*;
+import com.lindseyayresart.lindseywebsite.Model.PrintOrder;
 import com.lindseyayresart.lindseywebsite.Repository.ArtelloPrintVariantRepository;
 import com.lindseyayresart.lindseywebsite.Repository.PrintOrderRepository;
 import com.squareup.square.types.Payment;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Currency;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,13 +23,12 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequiredArgsConstructor
 public class OrderService {
 
+    // Simple in-memory counter for the NNNN part of the reference (resetting daily logic would go here)
+    private static final AtomicLong sequence = new AtomicLong(1);
     private final PrintOrderRepository orderRepository;
     private final ArtelloPrintVariantRepository variantRepository;
     private final SquarePaymentService squareService; // Hypothetical Square wrapper
     private final ArtelloService artelloService;
-
-    // Simple in-memory counter for the NNNN part of the reference (resetting daily logic would go here)
-    private static final AtomicLong sequence = new AtomicLong(1);
 
     @Transactional
     public OrderConfirmation processCheckout(CheckoutRequest request) {

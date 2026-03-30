@@ -3,7 +3,6 @@ package com.lindseyayresart.lindseywebsite.Services;
 
 import com.lindseyayresart.lindseywebsite.Config.SquareConfig;
 import com.squareup.square.SquareClient;
-import com.squareup.square.V1TransactionsClient;
 import com.squareup.square.types.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,7 @@ public class SquarePaymentService {
      * Processes a payment using a nonce (sourceId) from the frontend.
      */
     public Optional<Payment> createPayment(String nonce, BigDecimal amount, String currency,
-                                          String buyerEmail, String orderReference) {
+                                           String buyerEmail, String orderReference) {
 
         // Square amounts are in the smallest unit (cents for USD)
         long amountInCents = amount.multiply(BigDecimal.valueOf(100)).longValue();
@@ -50,7 +49,7 @@ public class SquarePaymentService {
             if (response.getErrors().isPresent()) {
                 String errorMsg = String.valueOf(response.getErrors().get().getFirst().getDetail());
                 log.error("Square Payment Error: {}", errorMsg);
-               return Optional.empty();
+                return Optional.empty();
             }
 
             return response.getPayment();

@@ -27,29 +27,29 @@ public class FeaturedArtworkDTO implements Serializable {
     private String title;
     private String artDescription;
     private String dimensions;
-    
+
     /**
      * Small/compressed image URL for initial display
      */
     private String compressedImageUrl;
-    
+
     /**
      * Full resolution image URL - only sent when user selects the artwork
      */
     private String fullImageUrl;
-    
+
     private String linkToPrint;
     private LocalDate dateProduced;
     private BigDecimal originalPrice;
     private Boolean forSale;
     private String location;
     private String medium;
-    
+
     /**
      * Categories as comma-delimited string (no spaces): "Acrylic,Painting,Nature"
      */
     private String categories;
-    
+
     private Boolean isFeatured;
 }
 

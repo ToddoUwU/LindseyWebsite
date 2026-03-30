@@ -1,9 +1,7 @@
 package com.lindseyayresart.lindseywebsite.Services;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import com.lindseyayresart.lindseywebsite.Model.Artwork;
+import com.lindseyayresart.lindseywebsite.Repository.ArtworkRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -12,15 +10,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lindseyayresart.lindseywebsite.Model.Artwork;
-import com.lindseyayresart.lindseywebsite.Repository.ArtworkRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Service layer for Artwork operations.
- *
+ * <p>
  * Uses Spring Data JPA for database access and Spring Cache (Redis) for caching.
  * Each method returns a single responsibility - no combined DTOs.
- *
+ * <p>
  * Cache names:
  * - "artworks" - individual artworks by ID
  * - "featuredArtworks" - list of featured artworks
@@ -206,15 +205,15 @@ public class ArtworkService {
      * Evict all caches - call this when artworks are updated
      */
     @CacheEvict(value = {
-        "artworks",
-        "featuredArtworks",
-        "categories",
-        "dimensions",
-        "years",
-        "artworksByCategory",
-        "artworksByMedium",
-        "artworksForSale",
-        "mediums"
+            "artworks",
+            "featuredArtworks",
+            "categories",
+            "dimensions",
+            "years",
+            "artworksByCategory",
+            "artworksByMedium",
+            "artworksForSale",
+            "mediums"
     }, allEntries = true)
     public void evictAllCaches() {
         logger.info("All artwork caches evicted");

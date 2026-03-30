@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Simple rate limiting filter to protect against DoS attacks.
- * 
+ * <p>
  * Limits requests per IP address within a time window.
  * Returns 429 Too Many Requests when limit is exceeded.
  */
@@ -26,20 +26,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(RateLimitingFilter.class);
-
+    // Cleanup interval (every 5 minutes)
+    private static final long CLEANUP_INTERVAL_MS = 300000;
+    // Store request counts per IP
+    private final Map<String, RateLimitEntry> requestCounts = new ConcurrentHashMap<>();
     // Rate limit: requests per window
     @Value("${rate.limit.requests:100}")
     private int maxRequests;
-
     // Time window in milliseconds (default: 1 minute)
     @Value("${rate.limit.window.ms:60000}")
     private long windowMs;
-
-    // Store request counts per IP
-    private final Map<String, RateLimitEntry> requestCounts = new ConcurrentHashMap<>();
-
-    // Cleanup interval (every 5 minutes)
-    private static final long CLEANUP_INTERVAL_MS = 300000;
     private long lastCleanup = System.currentTimeMillis();
 
     @Override
@@ -57,13 +53,13 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
         // Get client IP (consider X-Forwarded-For for proxies)
         String clientIp = getClientIp(request);
-        
+
         // Periodically cleanup old entries
         cleanupOldEntries();
 
         // Check rate limit
-        RateLimitEntry entry = requestCounts.computeIfAbsent(clientIp, 
-            k -> new RateLimitEntry());
+        RateLimitEntry entry = requestCounts.computeIfAbsent(clientIp,
+                k -> new RateLimitEntry());
 
         if (entry.isRateLimited(maxRequests, windowMs)) {
             logger.warn("Rate limit exceeded for IP: {}", clientIp);
@@ -88,16 +84,16 @@ public class RateLimitingFilter extends OncePerRequestFilter {
      */
     private boolean isStaticResource(String path) {
         return path.startsWith("/images/") ||
-               path.startsWith("/assets/") ||
-               path.endsWith(".css") ||
-               path.endsWith(".js") ||
-               path.endsWith(".ico") ||
-               path.endsWith(".png") ||
-               path.endsWith(".jpg") ||
-               path.endsWith(".jpeg") ||
-               path.endsWith(".gif") ||
-               path.endsWith(".woff") ||
-               path.endsWith(".woff2");
+                path.startsWith("/assets/") ||
+                path.endsWith(".css") ||
+                path.endsWith(".js") ||
+                path.endsWith(".ico") ||
+                path.endsWith(".png") ||
+                path.endsWith(".jpg") ||
+                path.endsWith(".jpeg") ||
+                path.endsWith(".gif") ||
+                path.endsWith(".woff") ||
+                path.endsWith(".woff2");
     }
 
     /**
@@ -118,8 +114,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private void cleanupOldEntries() {
         long now = System.currentTimeMillis();
         if (now - lastCleanup > CLEANUP_INTERVAL_MS) {
-            requestCounts.entrySet().removeIf(entry -> 
-                entry.getValue().isExpired(windowMs * 2));
+            requestCounts.entrySet().removeIf(entry ->
+                    entry.getValue().isExpired(windowMs * 2));
             lastCleanup = now;
         }
     }
@@ -133,13 +129,13 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
         public synchronized boolean isRateLimited(int maxRequests, long windowMs) {
             long now = System.currentTimeMillis();
-            
+
             // Reset if window has passed
             if (now - windowStart > windowMs) {
                 count.set(0);
                 windowStart = now;
             }
-            
+
             return count.get() >= maxRequests;
         }
 

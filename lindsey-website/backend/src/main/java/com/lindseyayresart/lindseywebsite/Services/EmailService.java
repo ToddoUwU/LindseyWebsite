@@ -50,7 +50,7 @@ public class EmailService {
      * Send artwork inquiry email (to artist and confirmation to user)
      */
     public void sendInquiryEmail(Long artworkId, String artworkTitle, String artworkDimensions,
-                                String name, String email, String message) {
+                                 String name, String email, String message) {
         String sanitizedName = sanitizeInput(name);
         String sanitizedEmail = sanitizeInput(email);
         String sanitizedArtworkTitle = sanitizeInput(artworkTitle);
@@ -60,7 +60,7 @@ public class EmailService {
         // Send inquiry to artist
         String inquirySubject = "ORIGINAL ARTWORK INQUIRY: " + sanitizedArtworkTitle;
         String inquiryBody = buildInquiryEmailBody(artworkId, sanitizedArtworkTitle, sanitizedArtworkDimensions,
-                                                sanitizedName, sanitizedEmail, sanitizedMessage);
+                sanitizedName, sanitizedEmail, sanitizedMessage);
         sendEmail("lindseyayres@yahoo.com", inquirySubject, inquiryBody, sanitizedEmail);
 
         // Send confirmation to user
@@ -104,11 +104,11 @@ public class EmailService {
      */
     private String buildContactEmailBody(String name, String email, String message) {
         return String.format(
-            "New contact form submission:\n\n" +
-            "Name: %s\n" +
-            "Email: %s\n\n" +
-            "Message:\n%s",
-            name, email, message
+                "New contact form submission:\n\n" +
+                        "Name: %s\n" +
+                        "Email: %s\n\n" +
+                        "Message:\n%s",
+                name, email, message
         );
     }
 
@@ -116,7 +116,7 @@ public class EmailService {
      * Build email body for artwork inquiry
      */
     private String buildInquiryEmailBody(Long artworkId, String title, String dimensions,
-                                        String name, String email, String message) {
+                                         String name, String email, String message) {
         StringBuilder body = new StringBuilder();
         body.append("ORIGINAL ARTWORK INQUIRY\n\n");
         body.append("Artwork ID: ").append(artworkId).append("\n");
@@ -139,12 +139,12 @@ public class EmailService {
      */
     private String buildConfirmationEmailBody(String name, String artworkTitle) {
         return String.format(
-            "Dear %s,\n\n" +
-            "Thank you for your inquiry about the artwork '%s'. " +
-            "We appreciate your interest and will get back to you soon.\n\n" +
-            "Best regards,\n" +
-            "Lindsey Ayres Art",
-            name, artworkTitle
+                "Dear %s,\n\n" +
+                        "Thank you for your inquiry about the artwork '%s'. " +
+                        "We appreciate your interest and will get back to you soon.\n\n" +
+                        "Best regards,\n" +
+                        "Lindsey Ayres Art",
+                name, artworkTitle
         );
     }
 
@@ -153,12 +153,12 @@ public class EmailService {
      */
     private String buildContactConfirmationEmailBody(String name) {
         return String.format(
-            "Dear %s,\n\n" +
-            "Thank you for reaching out to us. " +
-            "We have received your message and will get back to you shortly.\n\n" +
-            "Best regards,\n" +
-            "Lindsey Ayres Art",
-            name
+                "Dear %s,\n\n" +
+                        "Thank you for reaching out to us. " +
+                        "We have received your message and will get back to you shortly.\n\n" +
+                        "Best regards,\n" +
+                        "Lindsey Ayres Art",
+                name
         );
     }
 }

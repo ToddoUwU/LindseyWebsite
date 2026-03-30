@@ -1,19 +1,17 @@
 package com.lindseyayresart.lindseywebsite.Controller;
 
+import com.lindseyayresart.lindseywebsite.Model.DTO.ContactRequest;
+import com.lindseyayresart.lindseywebsite.Model.DTO.InquiryRequest;
+import com.lindseyayresart.lindseywebsite.Services.EmailService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.lindseyayresart.lindseywebsite.Model.DTO.ContactRequest;
-import com.lindseyayresart.lindseywebsite.Model.DTO.InquiryRequest;
-import com.lindseyayresart.lindseywebsite.Services.EmailService;
-
-import jakarta.validation.Valid;
-
 /**
  * REST Controller for contact-related endpoints.
- *
+ * <p>
  * Endpoints:
  * - POST /api/contact - General contact form
  * - POST /api/inquiry - Artwork inquiry form
@@ -41,10 +39,10 @@ public class ContactController {
 
         try {
             emailService.sendContactEmail(
-                request.name(),
-                request.email(),
-                request.subject(),
-                request.message()
+                    request.name(),
+                    request.email(),
+                    request.subject(),
+                    request.message()
             );
 
             logger.info("Contact email sent successfully for: {}", request.email());
@@ -53,7 +51,7 @@ public class ContactController {
         } catch (Exception e) {
             logger.error("Failed to send contact email for: {}", request.email(), e);
             return ResponseEntity.internalServerError()
-                .body("Failed to send message. Please try again later.");
+                    .body("Failed to send message. Please try again later.");
         }
     }
 
@@ -64,27 +62,27 @@ public class ContactController {
     @PostMapping("/inquiry")
     public ResponseEntity<String> submitInquiry(@Valid @RequestBody InquiryRequest request) {
         logger.info("POST /api/inquiry - Inquiry for artwork: {} from: {}",
-                   request.artworkTitle(), request.email());
+                request.artworkTitle(), request.email());
 
         try {
             emailService.sendInquiryEmail(
-                request.artworkId(),
-                request.artworkTitle(),
-                request.artworkDimensions(),
-                request.name(),
-                request.email(),
-                request.message()
+                    request.artworkId(),
+                    request.artworkTitle(),
+                    request.artworkDimensions(),
+                    request.name(),
+                    request.email(),
+                    request.message()
             );
 
             logger.info("Inquiry email sent successfully for artwork: {} from: {}",
-                       request.artworkTitle(), request.email());
+                    request.artworkTitle(), request.email());
             return ResponseEntity.ok("Inquiry sent successfully");
 
         } catch (Exception e) {
             logger.error("Failed to send inquiry email for artwork: {} from: {}",
-                        request.artworkTitle(), request.email(), e);
+                    request.artworkTitle(), request.email(), e);
             return ResponseEntity.internalServerError()
-                .body("Failed to send inquiry. Please try again later.");
+                    .body("Failed to send inquiry. Please try again later.");
         }
     }
 }

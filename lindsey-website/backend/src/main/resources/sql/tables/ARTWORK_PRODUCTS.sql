@@ -4,56 +4,58 @@
 -- One artwork can have many products (one-to-many relationship)
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS ARTWORK_PRODUCTS (
-    id BIGSERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS ARTWORK_PRODUCTS
+(
+    id                BIGSERIAL PRIMARY KEY,
 
     -- Foreign key to ARTWORKS table (required)
-    artwork_id BIGINT NOT NULL REFERENCES ARTWORKS(id) ON DELETE CASCADE,
+    artwork_id        BIGINT       NOT NULL REFERENCES ARTWORKS (id) ON DELETE CASCADE,
 
     -- Product description (required) - e.g., "8x10 Print", "Coffee Mug"
-    description VARCHAR(255) NOT NULL,
+    description       VARCHAR(255) NOT NULL,
 
     -- Product category (required) - e.g., "Print", "Canvas", "Mug", "Apparel"
-    product_category VARCHAR(100) NOT NULL,
+    product_category  VARCHAR(100) NOT NULL,
 
     -- URL to purchase the product (required) - links to Printify, Etsy, etc.
-    product_url VARCHAR(500) NOT NULL,
+    product_url       VARCHAR(500) NOT NULL,
 
     -- Price (optional - may be dynamic on external site)
-    price DECIMAL(10, 2),
+    price             DECIMAL(10, 2),
 
     -- Whether product is currently available
-    is_available BOOLEAN DEFAULT TRUE,
+    is_available      BOOLEAN   DEFAULT TRUE,
 
     -- Display order for sorting (lower numbers first)
-    display_order INTEGER DEFAULT 0,
+    display_order     INTEGER   DEFAULT 0,
 
     -- Optional image URL for product mockup
     product_image_url VARCHAR(500),
 
     -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Index for faster lookups by artwork
-CREATE INDEX IF NOT EXISTS idx_artwork_products_artwork_id ON ARTWORK_PRODUCTS(artwork_id);
+CREATE INDEX IF NOT EXISTS idx_artwork_products_artwork_id ON ARTWORK_PRODUCTS (artwork_id);
 
 -- Index for category lookups
-CREATE INDEX IF NOT EXISTS idx_artwork_products_category ON ARTWORK_PRODUCTS(product_category);
+CREATE INDEX IF NOT EXISTS idx_artwork_products_category ON ARTWORK_PRODUCTS (product_category);
 
 -- Index for available products
-CREATE INDEX IF NOT EXISTS idx_artwork_products_available ON ARTWORK_PRODUCTS(is_available);
+CREATE INDEX IF NOT EXISTS idx_artwork_products_available ON ARTWORK_PRODUCTS (is_available);
 
 -- Composite index for common query pattern
-CREATE INDEX IF NOT EXISTS idx_artwork_products_artwork_available ON ARTWORK_PRODUCTS(artwork_id, is_available);
+CREATE INDEX IF NOT EXISTS idx_artwork_products_artwork_available ON ARTWORK_PRODUCTS (artwork_id, is_available);
 
 -- ============================================================
 -- Trigger to auto-update updated_at timestamp
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION update_artwork_products_timestamp()
-RETURNS TRIGGER AS $$
+    RETURNS TRIGGER AS
+$$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
     RETURN NEW;
@@ -62,9 +64,10 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trigger_update_artwork_products_timestamp ON ARTWORK_PRODUCTS;
 CREATE TRIGGER trigger_update_artwork_products_timestamp
-    BEFORE UPDATE ON ARTWORK_PRODUCTS
+    BEFORE UPDATE
+    ON ARTWORK_PRODUCTS
     FOR EACH ROW
-    EXECUTE FUNCTION update_artwork_products_timestamp();
+EXECUTE FUNCTION update_artwork_products_timestamp();
 
 -- ============================================================
 -- Comments

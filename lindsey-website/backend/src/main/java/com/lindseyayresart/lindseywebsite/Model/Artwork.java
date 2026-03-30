@@ -1,6 +1,5 @@
 package com.lindseyayresart.lindseywebsite.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,10 +13,10 @@ import java.util.List;
 
 /**
  * Entity representing an artwork.
- *
+ * <p>
  * Caching is handled at the service layer using Spring Cache with Caffeine.
  * This keeps the entity clean and separates caching concerns.
- *
+ * <p>
  * An artwork can have many associated products (prints, merchandise, etc.)
  * via the one-to-many relationship with ArtworkProduct.
  */
@@ -37,16 +36,16 @@ public class Artwork implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(name = "title", nullable = false, unique = true)
     private String title;
-    
+
     @Column(name = "art_description", columnDefinition = "TEXT")
     private String artDescription;
-    
+
     @Column(name = "dimensions")
     private String dimensions;
-    
+
     @Column(name = "small_image_url")
     private String smallImageUrl;
 
@@ -79,40 +78,40 @@ public class Artwork implements Serializable {
 
     @Column(name = "artello_product_set_id", length = 36)
     private String artelloProductSetId;
-    
+
     @Column(name = "date_produced")
     private LocalDate dateProduced;
-    
+
     /**
      * Price of the original artwork (if for sale).
      */
     @Column(name = "original_price")
     private BigDecimal originalPrice;
-    
+
     /**
      * Whether the original artwork is for sale.
      */
     @Column(name = "for_sale")
     private Boolean forSale;
-    
+
     @Column(name = "location")
     private String location;
-    
+
     @Column(name = "medium")
     private String medium;
-    
+
     @Column(name = "categories", columnDefinition = "TEXT")
     private String categories;
-    
+
     @Column(name = "is_featured")
     private Boolean isFeatured;
-    
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-    
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
+
     // Hash value used for cache invalidation verification
     @Column(name = "content_hash")
     private String contentHash;

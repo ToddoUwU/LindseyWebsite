@@ -18,8 +18,8 @@ public class HealthController {
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
         return ResponseEntity.ok(Map.of(
-            "status", "UP",
-            "timestamp", Instant.now().toString()
+                "status", "UP",
+                "timestamp", Instant.now().toString()
         ));
     }
 }

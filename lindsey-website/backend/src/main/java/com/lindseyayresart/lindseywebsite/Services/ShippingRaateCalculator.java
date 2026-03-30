@@ -35,6 +35,16 @@ class ShippingRateCalculator {
     );
 
     /**
+     * Rounds the value up to the next whole dollar.
+     * Scale is set back to 2 for currency consistency (e.g., 5.00).
+     */
+    private static BigDecimal doRound(BigDecimal val, MathContext mc) {
+        if (val == null) return BigDecimal.ZERO;
+        // round() handles the CEILING logic based on MathContext
+        return val.round(mc).setScale(2, RoundingMode.UNNECESSARY);
+    }
+
+    /**
      * Calculates the shipping estimate based on Artello's logic.
      * Rounds up to the nearest dollar using MathContext.
      */
@@ -48,16 +58,6 @@ class ShippingRateCalculator {
         }
 
         return doRound(baseRate, ROUND_UP_CONTEXT);
-    }
-
-    /**
-     * Rounds the value up to the next whole dollar.
-     * Scale is set back to 2 for currency consistency (e.g., 5.00).
-     */
-    private static BigDecimal doRound(BigDecimal val, MathContext mc) {
-        if (val == null) return BigDecimal.ZERO;
-        // round() handles the CEILING logic based on MathContext
-        return val.round(mc).setScale(2, RoundingMode.UNNECESSARY);
     }
 
     private BigDecimal calculateUnframedRate(String size) {

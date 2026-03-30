@@ -182,7 +182,7 @@ export class ProductService {
    * Calls: GET /api/products/artwork/{artworkId}
    */
   getProductsByArtworkId(artworkId: number): Observable<ArtworkProduct[]> {
-    return this.http.get<ArtworkProduct[]>(`${this.apiUrl}/products/artwork/${artworkId}`).pipe(
+    return this.http.get<ArtworkProduct[]>(`${this.apiUrl}/artwork/${artworkId}/products`).pipe(
       catchError(error => {
         console.warn('⚠️ Using mock products for artwork:', artworkId);
         return of(MOCK_PRODUCTS.filter(p => p.artworkId === artworkId && p.isAvailable));

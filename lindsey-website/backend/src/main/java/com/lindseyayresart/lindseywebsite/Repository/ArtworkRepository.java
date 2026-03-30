@@ -1,11 +1,10 @@
 package com.lindseyayresart.lindseywebsite.Repository;
 
+import com.lindseyayresart.lindseywebsite.Model.Artwork;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import com.lindseyayresart.lindseywebsite.Model.Artwork;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,12 +30,12 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
      */
     @EntityGraph(attributePaths = "products")
     @Query("""
-        SELECT a FROM Artwork a
-        WHERE a.isFeatured = true
-        AND a.smallImageUrl IS NOT NULL AND a.smallImageUrl != ''
-        AND a.largeImageUrl IS NOT NULL AND a.largeImageUrl != ''
-        ORDER BY a.updatedAt DESC
-        """)
+            SELECT a FROM Artwork a
+            WHERE a.isFeatured = true
+            AND a.smallImageUrl IS NOT NULL AND a.smallImageUrl != ''
+            AND a.largeImageUrl IS NOT NULL AND a.largeImageUrl != ''
+            ORDER BY a.updatedAt DESC
+            """)
     List<Artwork> findFeaturedWithImages();
 
     // ============================================================
@@ -45,12 +44,12 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 
     @EntityGraph(attributePaths = "products")
     @Query("""
-        SELECT a FROM Artwork a
-        WHERE a.forSale = true
-        AND a.smallImageUrl IS NOT NULL AND a.smallImageUrl != ''
-        AND a.largeImageUrl IS NOT NULL AND a.largeImageUrl != ''
-        ORDER BY a.title ASC
-        """)
+            SELECT a FROM Artwork a
+            WHERE a.forSale = true
+            AND a.smallImageUrl IS NOT NULL AND a.smallImageUrl != ''
+            AND a.largeImageUrl IS NOT NULL AND a.largeImageUrl != ''
+            ORDER BY a.title ASC
+            """)
     List<Artwork> findForSaleWithImages();
 
     // ============================================================
@@ -95,11 +94,11 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
      * Native query required because categories are stored as "Cat1,Cat2,Cat3"
      */
     @Query(value = """
-        SELECT DISTINCT TRIM(unnest(string_to_array(categories, ','))) as category
-        FROM artworks 
-        WHERE categories IS NOT NULL AND categories != ''
-        ORDER BY category
-        """, nativeQuery = true)
+            SELECT DISTINCT TRIM(unnest(string_to_array(categories, ','))) as category
+            FROM artworks 
+            WHERE categories IS NOT NULL AND categories != ''
+            ORDER BY category
+            """, nativeQuery = true)
     Set<String> findAllUniqueCategories();
 
     /**
@@ -107,11 +106,11 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
      * Native query required to extract year from date field.
      */
     @Query(value = """
-        SELECT DISTINCT EXTRACT(YEAR FROM date_produced)::INTEGER as year
-        FROM artworks 
-        WHERE date_produced IS NOT NULL
-        ORDER BY year DESC
-        """, nativeQuery = true)
+            SELECT DISTINCT EXTRACT(YEAR FROM date_produced)::INTEGER as year
+            FROM artworks 
+            WHERE date_produced IS NOT NULL
+            ORDER BY year DESC
+            """, nativeQuery = true)
     Set<Integer> findAllUniqueYears();
 
     // ============================================================

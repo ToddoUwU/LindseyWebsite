@@ -1,19 +1,18 @@
 package com.lindseyayresart.lindseywebsite.Controller;
 
+import com.lindseyayresart.lindseywebsite.Model.Artwork;
+import com.lindseyayresart.lindseywebsite.Services.ArtworkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.lindseyayresart.lindseywebsite.Model.Artwork;
-import com.lindseyayresart.lindseywebsite.Services.ArtworkService;
 
 import java.util.List;
 import java.util.Set;
 
 /**
  * REST Controller for artwork-related endpoints.
- *
+ * <p>
  * Separate endpoints for each data type (no combined DTOs):
  * - GET /api/featured - Featured artworks
  * - GET /api/categories - Unique categories
@@ -25,9 +24,9 @@ import java.util.Set;
 @RequestMapping("/api")
 @CrossOrigin(origins = {"http://localhost:4200", "${ALLOWED_ORIGINS:}"})
 public class ArtworkController {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ArtworkController.class);
-    
+
     private final ArtworkService artworkService;
 
     public ArtworkController(ArtworkService artworkService) {
@@ -129,7 +128,7 @@ public class ArtworkController {
     /**
      * GET /api/artwork/{id}
      * Returns full artwork details by ID
-     *
+     * <p>
      * Security: Input validation applied
      */
     @GetMapping("/artwork/{id}")
@@ -144,24 +143,24 @@ public class ArtworkController {
 
         try {
             return artworkService.getArtworkById(id)
-                .map(artwork -> {
-                    logger.info("Returning artwork: {}", artwork.getTitle());
-                    return ResponseEntity.ok(artwork);
-                })
-                .orElseGet(() -> {
-                    logger.warn("Artwork not found: {}", id);
-                    return ResponseEntity.notFound().build();
-                });
+                    .map(artwork -> {
+                        logger.info("Returning artwork: {}", artwork.getTitle());
+                        return ResponseEntity.ok(artwork);
+                    })
+                    .orElseGet(() -> {
+                        logger.warn("Artwork not found: {}", id);
+                        return ResponseEntity.notFound().build();
+                    });
         } catch (Exception e) {
             logger.error("Error fetching artwork by ID: {}", id, e);
             return ResponseEntity.internalServerError().build();
         }
     }
-    
+
     /**
      * GET /api/artwork/title/{title}
      * Returns full artwork details by title
-     *
+     * <p>
      * Security: Input validation and sanitization applied
      */
     @GetMapping("/artwork/title/{title}")
@@ -177,14 +176,14 @@ public class ArtworkController {
 
         try {
             return artworkService.getArtworkByTitle(sanitized)
-                .map(artwork -> {
-                    logger.info("Returning artwork: {}", artwork.getTitle());
-                    return ResponseEntity.ok(artwork);
-                })
-                .orElseGet(() -> {
-                    logger.warn("Artwork not found by title");
-                    return ResponseEntity.notFound().build();
-                });
+                    .map(artwork -> {
+                        logger.info("Returning artwork: {}", artwork.getTitle());
+                        return ResponseEntity.ok(artwork);
+                    })
+                    .orElseGet(() -> {
+                        logger.warn("Artwork not found by title");
+                        return ResponseEntity.notFound().build();
+                    });
         } catch (Exception e) {
             logger.error("Error fetching artwork by title", e);
             return ResponseEntity.internalServerError().build();
@@ -198,7 +197,7 @@ public class ArtworkController {
     /**
      * GET /api/artworks/category/{category}
      * Returns artworks filtered by category
-     *
+     * <p>
      * Security: Input validation and sanitization applied
      */
     @GetMapping("/artworks/category/{category}")
@@ -225,7 +224,7 @@ public class ArtworkController {
     /**
      * GET /api/artworks/medium/{medium}
      * Returns artworks filtered by medium
-     *
+     * <p>
      * Security: Input validation and sanitization applied
      */
     @GetMapping("/artworks/medium/{medium}")
@@ -270,7 +269,7 @@ public class ArtworkController {
     /**
      * GET /api/artworks/search?q={searchTerm}
      * Search artworks by term
-     *
+     * <p>
      * Security protections:
      * - Input validation (null/empty check)
      * - Length limit (max 100 chars) to prevent DoS
@@ -323,7 +322,7 @@ public class ArtworkController {
     /**
      * POST /api/admin/cache/evict
      * Evict all caches (admin endpoint)
-     *
+     * <p>
      * Security: This endpoint should be protected in production.
      * Consider adding authentication or IP restrictions.
      */
@@ -347,7 +346,7 @@ public class ArtworkController {
     /**
      * Sanitize user input to prevent injection attacks.
      *
-     * @param input The raw user input
+     * @param input     The raw user input
      * @param maxLength Maximum allowed length
      * @return Sanitized string, or null if input is invalid
      */

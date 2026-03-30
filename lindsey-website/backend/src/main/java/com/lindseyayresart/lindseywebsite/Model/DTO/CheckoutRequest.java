@@ -15,4 +15,5 @@ public record CheckoutRequest(
         String state,
         String zipCode,
         String shippingCountry // "US"/"CA"
-) {}
+) {
+}
