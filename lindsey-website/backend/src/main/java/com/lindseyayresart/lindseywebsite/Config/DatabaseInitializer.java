@@ -74,6 +74,8 @@ public class DatabaseInitializer {
                 // ============================================================
                 List<Map<String, Object>> artworksData = new ArrayList<>();
                 List<Map<String, Object>> productsData = new ArrayList<>();
+                List<Map<String, Object>> printOrdersData = new ArrayList<>();
+                List<Map<String, Object>> artelloPrintVariantsData = new ArrayList<>();
 
                 if (tableExists("ARTWORK_PRODUCTS")) {
                     productsData = backupTableData("ARTWORK_PRODUCTS");
@@ -85,11 +87,27 @@ public class DatabaseInitializer {
                     logger.info("Backed up {} artwork records", artworksData.size());
                 }
 
+                if (tableExists("PRINT_ORDERS")) {
+                    printOrdersData = backupTableData("PRINT_ORDERS");
+                    logger.info("Backed up {} print orders records", printOrdersData.size());
+                }
+
+                if (tableExists("ARTELLO_PRINT_VARIANTS")) {
+                    artelloPrintVariantsData = backupTableData("ARTELLO_PRINT_VARIANTS");
+                    logger.info("Backed up {} artello print variants records", artelloPrintVariantsData.size());
+                }
+
                 // ============================================================
                 // Drop tables (products first due to foreign key)
                 // ============================================================
                 dropTable("ARTWORK_PRODUCTS");
                 logger.info("ARTWORK_PRODUCTS table dropped");
+
+                dropTable("PRINT_ORDERS");
+                logger.info("PRINT_ORDERS table dropped");
+
+                dropTable("ARTELLO_PRINT_VARIANTS");
+                logger.info("ARTELLO_PRINT_VARIANTS table dropped");
 
                 dropTable("ARTWORKS");
                 logger.info("ARTWORKS table dropped");
@@ -100,8 +118,14 @@ public class DatabaseInitializer {
                 executeScript("sql/tables/ARTWORKS.sql");
                 logger.info("ARTWORKS table recreated");
 
+                executeScript("sql/tables/ARTELLO_PRINT_VARIANTS.sql");
+                logger.info("ARTELLO_PRINT_VARIANTS table recreated");
+
                 executeScript("sql/tables/ARTWORK_PRODUCTS.sql");
                 logger.info("ARTWORK_PRODUCTS table recreated");
+
+                executeScript("sql/tables/PRINT_ORDERS.sql");
+                logger.info("PRINT_ORDERS table recreated");
 
                 // ============================================================
                 // Restore data
@@ -114,6 +138,16 @@ public class DatabaseInitializer {
                 if (!productsData.isEmpty()) {
                     restoreTableData("ARTWORK_PRODUCTS", productsData);
                     logger.info("Product data restored");
+                }
+
+                if (!artelloPrintVariantsData.isEmpty()) {
+                    restoreTableData("ARTELLO_PRINT_VARIANTS", artelloPrintVariantsData);
+                    logger.info("ArteLlo print variants data restored");
+                }
+
+                if (!printOrdersData.isEmpty()) {
+                    restoreTableData("PRINT_ORDERS", printOrdersData);
+                    logger.info("Print orders data restored");
                 }
 
                 // ============================================================
@@ -158,6 +192,16 @@ public class DatabaseInitializer {
                 if (!tableExists("ARTWORK_PRODUCTS")) {
                     logger.info("ARTWORK_PRODUCTS table missing, creating...");
                     executeScript("sql/tables/ARTWORK_PRODUCTS.sql");
+                }
+
+                if (!tableExists("ARTELLO_PRINT_VARIANTS")) {
+                    logger.info("ARTELLO_PRINT_VARIANTS table missing, creating...");
+                    executeScript("sql/tables/ARTELLO_PRINT_VARIANTS.sql");
+                }
+
+                if (!tableExists("PRINT_ORDERS")) {
+                    logger.info("PRINT_ORDERS table missing, creating...");
+                    executeScript("sql/tables/PRINT_ORDERS.sql");
                 }
             }
 

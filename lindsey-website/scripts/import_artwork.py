@@ -120,6 +120,7 @@ def calculate_content_hash(artwork):
         str(artwork.get('small_image_url', '')) +   # URL to small image
         str(artwork.get('large_image_url', '')) +   # URL to large image
         str(artwork.get('link_to_print', '')) +     # Link to purchase prints
+        str(artwork.get('artello_product_set_id', '')) + # Artello product set ID
         str(artwork.get('date_produced', '')) +     # Date the artwork was created
         str(artwork.get('original_price', '')) +    # Price of the original artwork
         str(artwork.get('for_sale', '')) +          # Whether the artwork is for sale
@@ -222,6 +223,8 @@ def parse_artwork_file(file_path):
         'large_image_url': '',
         # Set link to print, use empty string as default, and strip whitespace
         'link_to_print': artwork.get('linktoprint', '').strip(),
+        # Set Artello product set ID, use empty string as default, and strip whitespace
+        'artello_product_set_id': artwork.get('artelloproductsetid', '').strip(),
         # Set date produced, use empty string as default, and strip whitespace
         'date_produced': artwork.get('dateproduced', '').strip(),
         # Set original price, remove '$' and ',' from price, use '0' as default, and strip whitespace

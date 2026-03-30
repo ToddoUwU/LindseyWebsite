@@ -1,5 +1,7 @@
 package com.lindseyayresart.lindseywebsite.Config;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,78 +11,33 @@ import org.springframework.context.annotation.Configuration;
  * API keys and secrets are loaded from environment variables for security.
  * Never commit actual API keys to version control.
  */
+@Setter
 @Configuration
 @ConfigurationProperties(prefix = "external.api")
 public class ExternalApiConfig {
 
+    // Getters and setters
     // Lumaprints API Configuration
+    @Getter
     private String lumaprintsApiKey;
+    @Getter
     private String lumaprintsApiSecret;
     private String lumaprintsBaseUrl = "https://api.lumaprints.com"; // Production URL
+    @Getter
     private String lumaprintsSandboxUrl = "https://sandbox-api.lumaprints.com"; // Sandbox URL
 
     // Artello API Configuration
+    @Getter
     private String artelloApiKey;
+    @Getter
     private String artelloBaseUrl = "https://www.artelo.io/api";
 
     // Environment flag to use sandbox vs production
+    @Getter
     private boolean useSandbox = false;
-
-    // Getters and setters
-    public String getLumaprintsApiKey() {
-        return lumaprintsApiKey;
-    }
-
-    public void setLumaprintsApiKey(String lumaprintsApiKey) {
-        this.lumaprintsApiKey = lumaprintsApiKey;
-    }
-
-    public String getLumaprintsApiSecret() {
-        return lumaprintsApiSecret;
-    }
-
-    public void setLumaprintsApiSecret(String lumaprintsApiSecret) {
-        this.lumaprintsApiSecret = lumaprintsApiSecret;
-    }
 
     public String getLumaprintsBaseUrl() {
         return useSandbox ? lumaprintsSandboxUrl : lumaprintsBaseUrl;
-    }
-
-    public void setLumaprintsBaseUrl(String lumaprintsBaseUrl) {
-        this.lumaprintsBaseUrl = lumaprintsBaseUrl;
-    }
-
-    public String getLumaprintsSandboxUrl() {
-        return lumaprintsSandboxUrl;
-    }
-
-    public void setLumaprintsSandboxUrl(String lumaprintsSandboxUrl) {
-        this.lumaprintsSandboxUrl = lumaprintsSandboxUrl;
-    }
-
-    public String getArtelloApiKey() {
-        return artelloApiKey;
-    }
-
-    public void setArtelloApiKey(String artelloApiKey) {
-        this.artelloApiKey = artelloApiKey;
-    }
-
-    public String getArtelloBaseUrl() {
-        return artelloBaseUrl;
-    }
-
-    public void setArtelloBaseUrl(String artelloBaseUrl) {
-        this.artelloBaseUrl = artelloBaseUrl;
-    }
-
-    public boolean isUseSandbox() {
-        return useSandbox;
-    }
-
-    public void setUseSandbox(boolean useSandbox) {
-        this.useSandbox = useSandbox;
     }
 
     /**

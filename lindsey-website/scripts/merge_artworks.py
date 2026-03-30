@@ -529,6 +529,7 @@ def calculate_content_hash(artwork_data):
         str(artwork_data.get('large_image_width', '')),
         str(artwork_data.get('large_image_height', '')),
         str(artwork_data.get('link_to_print', '')),
+        str(artwork_data.get('artello_product_set_id', '')),
         str(artwork_data.get('date_produced', '')),
         str(artwork_data.get('original_price', '')),
         str(artwork_data.get('for_sale', '')),
@@ -582,14 +583,14 @@ def merge_artwork(cursor, artwork_data):
             small_image_url, small_image_width, small_image_height,
             medium_image_url, medium_image_width, medium_image_height,
             large_image_url, large_image_width, large_image_height,
-            link_to_print, date_produced, original_price, for_sale, location,
+            link_to_print, artello_product_set_id, date_produced, original_price, for_sale, location,
             medium, categories, is_featured, created_at, updated_at, content_hash
         ) VALUES (
             %s, %s, %s,
             %s, %s, %s,
             %s, %s, %s,
             %s, %s, %s,
-            %s, %s, %s, %s, %s,
+            %s, %s, %s, %s, %s, %s
             %s, %s, %s, %s, %s, %s
         )
         ON CONFLICT (title) DO UPDATE SET
@@ -605,6 +606,7 @@ def merge_artwork(cursor, artwork_data):
             large_image_width = EXCLUDED.large_image_width,
             large_image_height = EXCLUDED.large_image_height,
             link_to_print = EXCLUDED.link_to_print,
+            artello_product_set_id = EXCLUDED.artello_product_set_id,
             date_produced = EXCLUDED.date_produced,
             original_price = EXCLUDED.original_price,
             for_sale = EXCLUDED.for_sale,
@@ -629,6 +631,7 @@ def merge_artwork(cursor, artwork_data):
         artwork_data.get('large_image_width'),
         artwork_data.get('large_image_height'),
         artwork_data['link_to_print'],
+        artwork_data['artello_product_set_id'],
         artwork_data['date_produced'],
         artwork_data['original_price'],
         artwork_data['for_sale'],
@@ -694,6 +697,7 @@ def process_artwork_directory(art_dir):
             # 'small_image_width': small_w,
             # ... (other image fields)
             'link_to_print': parsed_data.get('linktoprint', '').strip(),
+            'artello_product_set_id': parsed_data.get('artelloproductsetid', '').strip(),
             'date_produced': date_produced,
             'original_price': original_price,
             'for_sale': for_sale,
@@ -740,6 +744,7 @@ def main():
             str(artwork_data.get('large_image_width', '')),
             str(artwork_data.get('large_image_height', '')),
             str(artwork_data.get('link_to_print', '')),
+            str(artwork_data.get('artello_product_set_id', '')),
             str(artwork_data.get('date_produced', '')),
             str(artwork_data.get('original_price', '')),
             str(artwork_data.get('for_sale', '')),
@@ -770,7 +775,7 @@ def main():
                 small_image_url, small_image_width, small_image_height,
                 medium_image_url, medium_image_width, medium_image_height,
                 large_image_url, large_image_width, large_image_height,
-                link_to_print, date_produced, original_price, for_sale, location,
+                link_to_print, artello_product_set_id, date_produced, original_price, for_sale, location,
                 medium, categories, is_featured, valid_ratios,
                 created_at, updated_at, content_hash
             ) VALUES (
@@ -778,7 +783,7 @@ def main():
                 %s, %s, %s,
                 %s, %s, %s,
                 %s, %s, %s,
-                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s
                 %s, %s, %s, %s,
                 %s, %s, %s
             )
@@ -795,6 +800,7 @@ def main():
                 large_image_width = EXCLUDED.large_image_width,
                 large_image_height = EXCLUDED.large_image_height,
                 link_to_print = EXCLUDED.link_to_print,
+                artello_product_set_id = EXCLUDED.artello_product_set_id,
                 date_produced = EXCLUDED.date_produced,
                 original_price = EXCLUDED.original_price,
                 for_sale = EXCLUDED.for_sale,
@@ -820,6 +826,7 @@ def main():
             artwork_data.get('large_image_width'),
             artwork_data.get('large_image_height'),
             artwork_data.get('link_to_print', ''),
+            artwork_data.get('artello_product_set_id', ''),
             artwork_data['date_produced'],
             artwork_data['original_price'],
             artwork_data['for_sale'],

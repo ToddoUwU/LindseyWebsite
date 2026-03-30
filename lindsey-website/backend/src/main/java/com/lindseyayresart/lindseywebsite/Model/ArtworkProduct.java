@@ -2,9 +2,7 @@ package com.lindseyayresart.lindseywebsite.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,7 +19,8 @@ import java.time.LocalDateTime;
  * 
  * One artwork can have many products (one-to-many relationship).
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -35,12 +34,7 @@ public class ArtworkProduct implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * The artwork this product is associated with.
-     * Many products can belong to one artwork.
-     * JsonIgnore prevents circular reference issues during JSON serialization.
-     */
-    @JsonIgnore
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artwork_id", nullable = false)
     private Artwork artwork;

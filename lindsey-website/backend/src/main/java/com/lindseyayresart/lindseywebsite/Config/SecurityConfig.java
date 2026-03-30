@@ -1,8 +1,13 @@
 package com.lindseyayresart.lindseywebsite.Config;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,6 +31,7 @@ import java.util.List;
  * - Rate limiting headers
  */
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Value("${ALLOWED_ORIGINS:http://localhost:4200}")
@@ -39,9 +45,9 @@ public class SecurityConfig {
     public OncePerRequestFilter securityHeadersFilter() {
         return new OncePerRequestFilter() {
             @Override
-            protected void doFilterInternal(HttpServletRequest request, 
-                                            HttpServletResponse response, 
-                                            FilterChain filterChain) 
+            protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                            @NonNull HttpServletResponse response,
+                                            @NonNull FilterChain filterChain)
                     throws ServletException, IOException {
                 
                 // Prevent XSS attacks - tells browser to block reflected XSS
@@ -93,9 +99,9 @@ public class SecurityConfig {
     public OncePerRequestFilter httpsRedirectFilter() {
         return new OncePerRequestFilter() {
             @Override
-            protected void doFilterInternal(HttpServletRequest request,
-                                            HttpServletResponse response,
-                                            FilterChain filterChain)
+            protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                            @NonNull HttpServletResponse response,
+                                            @NonNull FilterChain filterChain)
                     throws ServletException, IOException {
 
                 // Only redirect in production (when ENVIRONMENT=prod)
@@ -165,6 +171,35 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/api/**", configuration);
         
         return source;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                // 1. Disable the login form and basic auth completely
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+
+                // 2. Disable CSRF (essential for your Post-Payment webhooks/APIs)
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // 3. Attach your existing CORS config
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // 4. Define who can see what
+                .authorizeHttpRequests(auth -> auth
+                        // Open up the art and checkout endpoints
+                        .requestMatchers("/", "/index.html", "/static/**", "/*.js", "/*.css").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/order/**").permitAll()
+                        .requestMatchers("/api/artello/webhook").permitAll()
+
+                        // Since you're doing everything via .sh scripts,
+                        // we'll permit everything else for now so Spring stops asking for a login.
+                        .anyRequest().permitAll()
+                );
+        http.addFilterBefore(securityHeadersFilter(), org.springframework.security.web.header.HeaderWriterFilter.class);
+        return http.build();
     }
 }
 

@@ -1,5 +1,6 @@
 package com.lindseyayresart.lindseywebsite.Repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,7 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
     // Basic Queries - Using Spring Data JPA method naming
     // ============================================================
 
+    @EntityGraph(attributePaths = "products")
     Optional<Artwork> findByTitleIgnoreCase(String title);
 
     // ============================================================
@@ -27,10 +29,11 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
      * Get featured artworks that have valid image URLs.
      * Artworks without images should not be displayed.
      */
+    @EntityGraph(attributePaths = "products")
     @Query("""
-        SELECT a FROM Artwork a 
-        WHERE a.isFeatured = true 
-        AND a.smallImageUrl IS NOT NULL AND a.smallImageUrl != '' 
+        SELECT a FROM Artwork a
+        WHERE a.isFeatured = true
+        AND a.smallImageUrl IS NOT NULL AND a.smallImageUrl != ''
         AND a.largeImageUrl IS NOT NULL AND a.largeImageUrl != ''
         ORDER BY a.updatedAt DESC
         """)
@@ -40,10 +43,11 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
     // For Sale Queries - must have images
     // ============================================================
 
+    @EntityGraph(attributePaths = "products")
     @Query("""
-        SELECT a FROM Artwork a 
-        WHERE a.forSale = true 
-        AND a.smallImageUrl IS NOT NULL AND a.smallImageUrl != '' 
+        SELECT a FROM Artwork a
+        WHERE a.forSale = true
+        AND a.smallImageUrl IS NOT NULL AND a.smallImageUrl != ''
         AND a.largeImageUrl IS NOT NULL AND a.largeImageUrl != ''
         ORDER BY a.title ASC
         """)
@@ -53,14 +57,17 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
     // Category Queries (categories is comma-delimited, needs LIKE)
     // ============================================================
 
+    @EntityGraph(attributePaths = "products")
     List<Artwork> findByCategoriesContainingIgnoreCaseOrderByTitleAsc(String category);
 
     // ============================================================
     // Medium Queries
     // ============================================================
 
+    @EntityGraph(attributePaths = "products")
     List<Artwork> findByMediumIgnoreCaseOrderByTitleAsc(String medium);
 
+    @EntityGraph(attributePaths = "products")
     List<Artwork> findByMediumContainingIgnoreCaseOrderByTitleAsc(String medium);
 
     // ============================================================
@@ -111,6 +118,7 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
     // Search - Needs @Query for OR across multiple fields
     // ============================================================
 
+    @EntityGraph(attributePaths = "products")
     List<Artwork> findByTitleContainingIgnoreCaseOrArtDescriptionContainingIgnoreCaseOrCategoriesContainingIgnoreCaseOrderByTitleAsc(
             String titleSearch, String descriptionSearch, String categorySearch);
 }

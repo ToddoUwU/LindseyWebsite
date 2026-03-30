@@ -17,7 +17,6 @@ import {FilterService} from '../../services/filter.service';
   standalone: true,
   imports: [
     CommonModule,
-    NgOptimizedImage,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,

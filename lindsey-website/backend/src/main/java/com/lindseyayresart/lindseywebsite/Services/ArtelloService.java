@@ -1,156 +1,173 @@
 package com.lindseyayresart.lindseywebsite.Services;
 
 import com.lindseyayresart.lindseywebsite.Config.ExternalApiConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
+import com.lindseyayresart.lindseywebsite.Model.DTO.ArtelloOrderResponse;
+import com.lindseyayresart.lindseywebsite.Model.DTO.ArtelloProductSet;
+import com.lindseyayresart.lindseywebsite.Model.DTO.FulfillmentRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Service for integrating with Artello API.
- *
+ * <p>
  * Artello provides art marketplace and gallery services.
  * API Documentation: https://www.artelo.io/api
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ArtelloService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ArtelloService.class);
 
     private final ExternalApiConfig apiConfig;
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
 
-    public ArtelloService(ExternalApiConfig apiConfig, RestTemplate restTemplate) {
-        this.apiConfig = apiConfig;
-        this.restTemplate = restTemplate;
+    private static final ParameterizedTypeReference<List<ArtelloProductSet>> PRODUCT_SET_LIST_TYPE =
+            new ParameterizedTypeReference<>() {
+            };
+
+    private static final ParameterizedTypeReference<List<Map<String, Object>>> GENERIC_LIST_TYPE =
+            new ParameterizedTypeReference<>() {
+            };
+
+    public List<ArtelloProductSet> getProductSets(int limit) {
+        return restClient.get()
+                .uri(buildUri("/open/product-sets/get", Map.of("limit", limit)))
+                .headers(this::setHeaders)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, this::handleError)
+                .body(PRODUCT_SET_LIST_TYPE);
     }
 
-    /**
-     * Test authentication with Artello API.
-     *
-     * @return true if authentication successful
-     */
-    public boolean testAuthentication() {
+    public Optional<ArtelloProductSet> getProductSetByNameLimit1(String name) {
+        List<ArtelloProductSet> sets = restClient.get().uri(uriBuilder -> uriBuilder.path(apiConfig.getArtelloBaseUrl() + "/open/product-sets/get").queryParam("limit", 1).queryParam("name", name).build())
+                .header("Authorization", apiConfig.getArtelloBearerAuth())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        (request, response) -> {
+                            log.error("Artello API error: {} {}", response.getStatusCode(), response.getStatusText());
+                            throw new RuntimeException("Artello Service Unavailable");
+                        }
+                )
+                .body(PRODUCT_SET_LIST_TYPE)
+                ;
+
+        return sets == null ? Optional.empty() : Optional.ofNullable(sets.getFirst());
+    }
+
+    public Optional<ArtelloProductSet> getProductSetById(String setId) {
         try {
-            String url = apiConfig.getArtelloBaseUrl() + "/open/authentication/check";
+            List<ArtelloProductSet> responseList = restClient.get()
+                    .uri(uriBuilder -> uriBuilder.path(apiConfig.getArtelloBaseUrl() + "/open/product-sets/get-by-id")
+                            .queryParam("id", setId)
+                            .build())
+                    .header("Authorization", apiConfig.getArtelloBearerAuth())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                            (request, response) -> {
+                                log.error("Artello API error: {} {}", response.getStatusCode(), response.getStatusText());
+                                throw new RuntimeException("Artello Service Unavailable");
+                            }
+                    )
+                    .body(PRODUCT_SET_LIST_TYPE);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getArtelloBearerAuth());
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.GET, entity, String.class);
-
-            boolean success = response.getStatusCode().is2xxSuccessful();
-            logger.info("Artello API authentication test: {}", success ? "SUCCESS" : "FAILED");
-            return success;
+            return Optional.ofNullable(responseList)
+                    .filter(list -> !list.isEmpty())
+                    .map(List::getFirst);
 
         } catch (Exception e) {
-            logger.error("Failed to authenticate with Artello API", e);
-            return false;
+            log.error("Failed to fetch ProductSet {} due to: {}", setId, e.getMessage());
+            // Fallback logic in SyncService will catch this
+            throw e;
         }
     }
 
-    /**
-     * Get catalog from Artello.
-     *
-     * @return JSON response from API
-     */
-    public String getCatalog() {
-        try {
-            String url = apiConfig.getArtelloBaseUrl() + "/open/catalog/get";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getArtelloBearerAuth());
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.GET, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully retrieved Artello catalog");
-                return response.getBody();
-            } else {
-                logger.error("Failed to get Artello catalog: {}", response.getStatusCode());
-                return null;
-            }
-
-        } catch (Exception e) {
-            logger.error("Error calling Artello API", e);
-            return null;
-        }
+    public ArtelloOrderResponse createOrder(FulfillmentRequest orderRequest) {
+        return restClient.post()
+                .uri(buildUri("/open/orders/create", Map.of()))
+                .headers(this::setHeaders)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(orderRequest)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, this::handleError)
+                .body(ArtelloOrderResponse.class);
     }
 
-    /**
-     * Submit artwork for listing on Artello marketplace.
-     *
-     * @param artworkData JSON data about the artwork
-     * @return Response from API or null on failure
-     */
-    public String submitArtwork(String artworkData) {
-        try {
-            String url = apiConfig.getArtelloBaseUrl() + "/open/artworks/submit";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getArtelloBearerAuth());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> entity = new HttpEntity<>(artworkData, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully submitted artwork to Artello");
-                return response.getBody();
-            } else {
-                logger.error("Failed to submit artwork to Artello: {}", response.getStatusCode());
-                return null;
-            }
-
-        } catch (Exception e) {
-            logger.error("Error submitting artwork to Artello", e);
-            return null;
-        }
+    public ArtelloOrderResponse getOrderById(String orderId) {
+        return restClient.get()
+                .uri(buildUri("/open/orders/get-by-id", Map.of("orderId", orderId)))
+                .headers(this::setHeaders)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, this::handleError)
+                .body(ArtelloOrderResponse.class);
     }
 
+    public void cancelOrder(String orderId) {
+        restClient.delete()
+                .uri(buildUri("/open/orders/cancel", Map.of("id", orderId)))
+                .headers(this::setHeaders)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, this::handleError)
+                .toBodilessEntity();
+    }
+
+    // --- WEBHOOKS ---
+
+    public void registerWebhook(String url, String topic, List<String> statuses) {
+        Map<String, Object> body = Map.of("url", url, "topic", topic, "statuses", statuses);
+
+        restClient.post()
+                .uri(buildUri("/open/webhooks/save", Map.of()))
+                .headers(this::setHeaders)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, this::handleError)
+                .toBodilessEntity();
+    }
+
+    public List<Map<String, Object>> listWebhooks() {
+        return restClient.get()
+                .uri(buildUri("/open/webhooks/get", Map.of()))
+                .headers(this::setHeaders)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, this::handleError)
+                .body(GENERIC_LIST_TYPE);
+    }
+    // --- HELPERS ---
+
     /**
-     * Get sales data from Artello.
-     *
-     * @param startDate Start date in YYYY-MM-DD format
-     * @param endDate End date in YYYY-MM-DD format
-     * @return Sales data JSON or null on failure
+     * Constructs a full URI using the base URL from config and provided path/params.
      */
-    public String getSalesData(String startDate, String endDate) {
-        try {
-            String url = apiConfig.getArtelloBaseUrl() + "/open/sales";
+    private URI buildUri(String path, Map<String, Object> queryParams) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiConfig.getArtelloBaseUrl())
+                .path(path);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getArtelloBearerAuth());
+        queryParams.forEach(builder::queryParam);
+        return builder.build().toUri();
+    }
 
-            HttpEntity<String> entity = new HttpEntity<>(headers);
+    private void setHeaders(org.springframework.http.HttpHeaders headers) {
+        headers.setBearerAuth(apiConfig.getArtelloBearerAuth());
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+    }
 
-            // Add query parameters
-            String fullUrl = String.format("%s?startDate=%s&endDate=%s",
-                url, startDate, endDate);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                fullUrl, HttpMethod.GET, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully retrieved Artello sales data");
-                return response.getBody();
-            } else {
-                logger.error("Failed to get Artello sales data: {}", response.getStatusCode());
-                return null;
-            }
-
-        } catch (Exception e) {
-            logger.error("Error getting Artello sales data", e);
-            return null;
-        }
+    private void handleError(org.springframework.http.HttpRequest request, org.springframework.http.client.ClientHttpResponse response) throws java.io.IOException {
+        log.error("Artello API Failure: {} {} | URI: {}",
+                response.getStatusCode(), response.getStatusText(), request.getURI());
+        throw new RuntimeException("Artello API Error: " + response.getStatusCode());
     }
 }

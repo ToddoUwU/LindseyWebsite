@@ -96,3 +96,4 @@ tomcat-start.sh
 tomcat-stop.sh
 TOMCAT_QUICK_REF.sh
 /backend/src/main/resources/static/
+/frontend/.vscode/

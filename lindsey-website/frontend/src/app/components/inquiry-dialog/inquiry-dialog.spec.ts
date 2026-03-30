@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { InquiryDialog } from './inquiry-dialog';
+import { InquiryDialogComponent } from './inquiry-dialog';
 
 describe('InquiryDialog', () => {
-  let component: InquiryDialog;
-  let fixture: ComponentFixture<InquiryDialog>;
+  let component: InquiryDialogComponent;
+  let fixture: ComponentFixture<InquiryDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InquiryDialog]
+      imports: [InquiryDialogComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(InquiryDialog);
+    fixture = TestBed.createComponent(InquiryDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

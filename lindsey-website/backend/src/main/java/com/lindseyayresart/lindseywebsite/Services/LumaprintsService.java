@@ -1,33 +1,38 @@
 package com.lindseyayresart.lindseywebsite.Services;
 
 import com.lindseyayresart.lindseywebsite.Config.ExternalApiConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Service for integrating with Lumaprints API.
- *
+ * <p>
  * Lumaprints provides print-on-demand services for artwork.
  * API Documentation: https://api-docs.lumaprints.com/
- *
+ * <p>
  * Authentication: Basic HTTP authentication using API Key and Secret
  * Rate Limits: Check API documentation for current limits
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class LumaprintsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(LumaprintsService.class);
-
     private final ExternalApiConfig apiConfig;
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
 
-    public LumaprintsService(ExternalApiConfig apiConfig, RestTemplate restTemplate) {
-        this.apiConfig = apiConfig;
-        this.restTemplate = restTemplate;
-    }
+    // ==========================================
+    // CONNECTION TEST
+    // ==========================================
 
     /**
      * Test connection to Lumaprints API by attempting to get categories.
@@ -36,23 +41,18 @@ public class LumaprintsService {
      */
     public boolean testConnection() {
         try {
-            String url = apiConfig.getLumaprintsBaseUrl() + "/categories";
+            restClient.get()
+                    .uri(buildUri("/categories", Map.of()))
+                    .headers(this::setHeaders)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::handleError)
+                    .toBodilessEntity();
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getLumaprintsBasicAuth());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.GET, entity, String.class);
-
-            boolean success = response.getStatusCode().is2xxSuccessful();
-            logger.info("Lumaprints API connection test: {}", success ? "SUCCESS" : "FAILED");
-            return success;
+            log.info("Lumaprints API connection test: SUCCESS");
+            return true;
 
         } catch (Exception e) {
-            logger.error("Failed to connect to Lumaprints API", e);
+            log.error("Lumaprints API connection test: FAILED", e);
             return false;
         }
     }
@@ -112,44 +112,35 @@ public class LumaprintsService {
      * Get product cost for a specific configuration.
      *
      * @param subcategoryId The subcategory ID
-     * @param width Product width
-     * @param height Product height
-     * @param options Additional options (JSON string)
+     * @param width         Product width
+     * @param height        Product height
+     * @param options       Additional options (JSON string)
      * @return JSON response with pricing
      */
     public String getProductCost(String subcategoryId, int width, int height, String options) {
         try {
-            String url = apiConfig.getLumaprintsBaseUrl() + "/pricing/product";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getLumaprintsBasicAuth());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            // Build request body
-            String requestBody = String.format(
-                "{\"subcategoryId\": \"%s\", \"width\": %d, \"height\": %d",
-                subcategoryId, width, height);
-
+            Map<String, Object> body = new java.util.LinkedHashMap<>();
+            body.put("subcategoryId", subcategoryId);
+            body.put("width", width);
+            body.put("height", height);
             if (options != null && !options.trim().isEmpty()) {
-                requestBody += ", \"options\": " + options;
+                body.put("options", options);
             }
-            requestBody += "}";
 
-            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            String result = restClient.post()
+                    .uri(buildUri("/pricing/product", Map.of()))
+                    .headers(this::setHeaders)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::handleError)
+                    .body(String.class);
 
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully retrieved product cost for subcategory {}", subcategoryId);
-                return response.getBody();
-            } else {
-                logger.error("Failed to get product cost: {}", response.getStatusCode());
-                return null;
-            }
+            log.info("Successfully retrieved product cost for subcategory {}", subcategoryId);
+            return result;
 
         } catch (Exception e) {
-            logger.error("Error getting product cost", e);
+            log.error("Error getting product cost", e);
             return null;
         }
     }
@@ -162,27 +153,20 @@ public class LumaprintsService {
      */
     public String getShippingCost(String orderDetails) {
         try {
-            String url = apiConfig.getLumaprintsBaseUrl() + "/pricing/shipping";
+            String result = restClient.post()
+                    .uri(buildUri("/pricing/shipping", Map.of()))
+                    .headers(this::setHeaders)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(orderDetails)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::handleError)
+                    .body(String.class);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getLumaprintsBasicAuth());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> entity = new HttpEntity<>(orderDetails, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully calculated shipping cost");
-                return response.getBody();
-            } else {
-                logger.error("Failed to calculate shipping cost: {}", response.getStatusCode());
-                return null;
-            }
+            log.info("Successfully calculated shipping cost");
+            return result;
 
         } catch (Exception e) {
-            logger.error("Error calculating shipping cost", e);
+            log.error("Error calculating shipping cost", e);
             return null;
         }
     }
@@ -195,44 +179,35 @@ public class LumaprintsService {
      * Check if an image meets the required dimensions.
      *
      * @param imageUrl URL of the image to check
-     * @param width Required width
-     * @param height Required height
-     * @param options Additional options (JSON string)
+     * @param width    Required width
+     * @param height   Required height
+     * @param options  Additional options (JSON string)
      * @return JSON response with validation result
      */
     public String checkImage(String imageUrl, int width, int height, String options) {
         try {
-            String url = apiConfig.getLumaprintsBaseUrl() + "/images/check";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getLumaprintsBasicAuth());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            // Build request body
-            String requestBody = String.format(
-                "{\"url\": \"%s\", \"width\": %d, \"height\": %d",
-                imageUrl, width, height);
-
+            Map<String, Object> body = new java.util.LinkedHashMap<>();
+            body.put("url", imageUrl);
+            body.put("width", width);
+            body.put("height", height);
             if (options != null && !options.trim().isEmpty()) {
-                requestBody += ", \"options\": " + options;
+                body.put("options", options);
             }
-            requestBody += "}";
 
-            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            String result = restClient.post()
+                    .uri(buildUri("/images/check", Map.of()))
+                    .headers(this::setHeaders)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::handleError)
+                    .body(String.class);
 
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully checked image dimensions");
-                return response.getBody();
-            } else {
-                logger.error("Failed to check image: {}", response.getStatusCode());
-                return response.getBody(); // Return error details
-            }
+            log.info("Successfully checked image dimensions");
+            return result;
 
         } catch (Exception e) {
-            logger.error("Error checking image", e);
+            log.error("Error checking image", e);
             return null;
         }
     }
@@ -249,27 +224,20 @@ public class LumaprintsService {
      */
     public String createOrder(String orderData) {
         try {
-            String url = apiConfig.getLumaprintsBaseUrl() + "/orders";
+            String result = restClient.post()
+                    .uri(buildUri("/orders", Map.of()))
+                    .headers(this::setHeaders)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(orderData)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::handleError)
+                    .body(String.class);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getLumaprintsBasicAuth());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> entity = new HttpEntity<>(orderData, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully submitted order to Lumaprints");
-                return response.getBody();
-            } else {
-                logger.error("Failed to create order: {} - {}", response.getStatusCode(), response.getBody());
-                return response.getBody(); // Return error details
-            }
+            log.info("Successfully submitted order to Lumaprints");
+            return result;
 
         } catch (Exception e) {
-            logger.error("Error creating order", e);
+            log.error("Error creating order", e);
             return null;
         }
     }
@@ -287,18 +255,16 @@ public class LumaprintsService {
     /**
      * Get multiple orders with pagination.
      *
-     * @param page Page number (optional)
+     * @param page  Page number (optional)
      * @param limit Number of orders per page (optional)
      * @return JSON response with orders list
      */
     public String getOrders(Integer page, Integer limit) {
-        String url = "/orders";
-        if (page != null || limit != null) {
-            url += "?";
-            if (page != null) url += "page=" + page;
-            if (limit != null) url += (page != null ? "&" : "") + "limit=" + limit;
-        }
-        return makeGetRequest(url, "orders list");
+        Map<String, Object> params = new java.util.LinkedHashMap<>();
+        if (page != null) params.put("page", page);
+        if (limit != null) params.put("limit", limit);
+
+        return makeGetRequest("/orders", "orders list", params);
     }
 
     /**
@@ -323,27 +289,20 @@ public class LumaprintsService {
      */
     public String subscribeToWebhook(String webhookData) {
         try {
-            String url = apiConfig.getLumaprintsBaseUrl() + "/webhooks";
+            String result = restClient.post()
+                    .uri(buildUri("/webhooks", Map.of()))
+                    .headers(this::setHeaders)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(webhookData)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::handleError)
+                    .body(String.class);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getLumaprintsBasicAuth());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> entity = new HttpEntity<>(webhookData, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully subscribed to webhook");
-                return response.getBody();
-            } else {
-                logger.error("Failed to subscribe to webhook: {}", response.getStatusCode());
-                return response.getBody();
-            }
+            log.info("Successfully subscribed to webhook");
+            return result;
 
         } catch (Exception e) {
-            logger.error("Error subscribing to webhook", e);
+            log.error("Error subscribing to webhook", e);
             return null;
         }
     }
@@ -355,34 +314,59 @@ public class LumaprintsService {
     /**
      * Make a GET request to the Lumaprints API.
      *
-     * @param endpoint API endpoint (without base URL)
+     * @param endpoint    API endpoint (without base URL)
      * @param description Description for logging
      * @return JSON response or null on error
      */
     private String makeGetRequest(String endpoint, String description) {
+        return makeGetRequest(endpoint, description, Map.of());
+    }
+
+    /**
+     * Make a GET request to the Lumaprints API with query parameters.
+     *
+     * @param endpoint    API endpoint (without base URL)
+     * @param description Description for logging
+     * @param queryParams Query parameters to append
+     * @return JSON response or null on error
+     */
+    private String makeGetRequest(String endpoint, String description, Map<String, Object> queryParams) {
         try {
-            String url = apiConfig.getLumaprintsBaseUrl() + endpoint;
+            String result = restClient.get()
+                    .uri(buildUri(endpoint, queryParams))
+                    .headers(this::setHeaders)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, this::handleError)
+                    .body(String.class);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", apiConfig.getLumaprintsBasicAuth());
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.GET, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                logger.info("Successfully retrieved {}", description);
-                return response.getBody();
-            } else {
-                logger.error("Failed to get {}: {}", description, response.getStatusCode());
-                return null;
-            }
+            log.info("Successfully retrieved {}", description);
+            return result;
 
         } catch (Exception e) {
-            logger.error("Error retrieving {}", description, e);
+            log.error("Error retrieving {}", description, e);
             return null;
         }
+    }
+
+    /**
+     * Constructs a full URI using the base URL from config and provided path/params.
+     */
+    private URI buildUri(String path, Map<String, Object> queryParams) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiConfig.getLumaprintsBaseUrl())
+                .path(path);
+
+        queryParams.forEach(builder::queryParam);
+        return builder.build().toUri();
+    }
+
+    private void setHeaders(org.springframework.http.HttpHeaders headers) {
+        headers.set("Authorization", apiConfig.getLumaprintsBasicAuth());
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+    }
+
+    private void handleError(org.springframework.http.HttpRequest request, org.springframework.http.client.ClientHttpResponse response) throws java.io.IOException {
+        log.error("Lumaprints API Failure: {} {} | URI: {}",
+                response.getStatusCode(), response.getStatusText(), request.getURI());
+        throw new RuntimeException("Lumaprints API Error: " + response.getStatusCode());
     }
 }

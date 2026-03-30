@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS ARTWORKS (
     large_image_width INT,
     large_image_height INT,
     link_to_print VARCHAR(255),
+    artello_product_set_id VARCHAR(36),
     date_produced DATE,
     original_price DECIMAL(10,2),
     for_sale BOOLEAN DEFAULT FALSE,
@@ -29,6 +30,6 @@ CREATE TABLE IF NOT EXISTS ARTWORKS (
 -- Create indexes for faster searching
 CREATE INDEX IF NOT EXISTS idx_artwork_title ON ARTWORKS(title);
 CREATE INDEX IF NOT EXISTS idx_artwork_medium ON ARTWORKS(medium);
-CREATE INDEX IF NOT EXISTS idx_artwork_date ON ARTWORKS(date_produced);
+CREATE INDEX IF NOT EXISTS idx_artwork_date_produced ON ARTWORKS(date_produced);
 
 COMMENT ON COLUMN ARTWORKS.valid_ratios IS 'Comma-delimited list of valid print sizes that match the artwork ratio (e.g., "11x14,14x18,22x28")';

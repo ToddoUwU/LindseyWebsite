@@ -2,7 +2,7 @@ package com.lindseyayresart.lindseywebsite.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,9 +21,14 @@ import java.util.List;
  * An artwork can have many associated products (prints, merchandise, etc.)
  * via the one-to-many relationship with ArtworkProduct.
  */
-@Data
+
 @Entity
 @Table(name = "ARTWORKS")
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Artwork implements Serializable {
 
     @Serial
@@ -71,6 +76,9 @@ public class Artwork implements Serializable {
 
     @Column(name = "link_to_print")
     private String linkToPrint;
+
+    @Column(name = "artello_product_set_id", length = 36)
+    private String artelloProductSetId;
     
     @Column(name = "date_produced")
     private LocalDate dateProduced;
@@ -109,12 +117,7 @@ public class Artwork implements Serializable {
     @Column(name = "content_hash")
     private String contentHash;
 
-    /**
-     * Products associated with this artwork (prints, merchandise, etc.).
-     * One artwork can have many products.
-     * JsonIgnore prevents lazy loading issues during JSON serialization.
-     */
-    @JsonIgnore
+
     @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ArtworkProduct> products = new ArrayList<>();
 
@@ -132,5 +135,16 @@ public class Artwork implements Serializable {
     public void removeProduct(ArtworkProduct product) {
         products.remove(product);
         product.setArtwork(null);
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }
