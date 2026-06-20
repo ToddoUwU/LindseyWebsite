@@ -1,5 +1,7 @@
 package com.lindseyayresart.lindseywebsite.Services;
 
+import com.lindseyayresart.lindseywebsite.Model.ArtelloDesign;
+import com.lindseyayresart.lindseywebsite.Model.ArtelloGeometry;
 import com.lindseyayresart.lindseywebsite.Model.ArtelloPrintVariant;
 import com.lindseyayresart.lindseywebsite.Model.ArtelloProductInfo;
 import com.lindseyayresart.lindseywebsite.Model.Artwork;
@@ -17,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -99,6 +103,10 @@ public class ProductSetSyncService {
     }
 
     private void performVariantSync(Artwork artwork, ArtelloProductSet productSet) {
+        // The design image (and its previews) is identical across every variant, so pull
+        // the shared preview URLs up to the Artwork row once.
+        applySharedPreviews(artwork, productSet);
+
         // Upsert variants and get IDs of what is currently active on Artello
         Set<String> activeIds = productSet.getProducts().stream()
                 .map(info -> syncVariant(info, artwork))
@@ -130,11 +138,90 @@ public class ProductSetSyncService {
                         .artelloVariantId(info.getId())
                         .build());
 
+        // Product configuration — all NOT NULL on ARTELLO_PRINT_VARIANTS
+        variant.setCatalogProductId(info.getCatalogProductId());
+        variant.setSize(info.getSize());
+        variant.setOrientation(info.getOrientation());
+        variant.setPaperType(info.getPaperType());
+        variant.setPaperStyle(info.getPaperStyle());
+        variant.setFrameStyle(info.getFrameStyle());
+        variant.setFrameColor(info.getFrameColor());
+        variant.setIncludeFramingService(info.isIncludeFramingService());
+        variant.setIncludeHangingPins(info.isIncludeHangingPins());
+        variant.setIncludeMats(info.isIncludeMats());
+
+        // Pricing
+        variant.setUnitCost(unitCost);
+        variant.setShippingEstimate(shipping);
         variant.setRetailPrice(retail);
         variant.setIsAvailable(true);
-        variant.setSize(info.getSize());
-        variant.setFrameStyle(info.getFrameStyle());
+
+        // Per-variant design id + flat geometry
+        applyDesign(variant, info);
 
         return variantRepository.save(variant);
+    }
+
+    /**
+     * Maps the single design's id and flat geometry onto the variant.
+     * IndividualArtPrint always carries exactly one design; we take the first defensively.
+     */
+    private void applyDesign(ArtelloPrintVariant variant, ArtelloProductInfo info) {
+        if (info.getDesigns() == null || info.getDesigns().isEmpty()) {
+            return;
+        }
+        ArtelloDesign design = info.getDesigns().getFirst();
+        variant.setArtelloDesignId(design.getId());
+        variant.setGeometry(ArtelloGeometry.builder()
+                .height(design.getHeight())
+                .width(design.getWidth())
+                .x(design.getX())
+                .y(design.getY())
+                .rotation(design.getRotation())
+                .build());
+    }
+
+    /**
+     * Copies Artello's shared preview URLs onto the Artwork's image columns.
+     * Non-destructive: only overwrites a column when Artello actually supplies a value, so
+     * artworks not yet uploaded to Artello keep their local /images fallback URLs.
+     * Size mapping: xs -> small, sm -> medium, lg -> large.
+     */
+    private void applySharedPreviews(Artwork artwork, ArtelloProductSet productSet) {
+        Map<String, String> previews = productSet.getProducts().stream()
+                .map(ArtelloProductInfo::getDesigns)
+                .filter(d -> d != null && !d.isEmpty())
+                .map(d -> d.getFirst().getImage())
+                .filter(Objects::nonNull)
+                .map(ArtelloDesign.ArtelloImage::getPreviews)
+                .filter(p -> p != null && !p.isEmpty())
+                .findFirst()
+                .orElse(null);
+
+        if (previews == null) {
+            return; // No Artello previews yet — keep existing local image URLs.
+        }
+
+        boolean changed = false;
+        String xs = previews.get("xs");
+        String sm = previews.get("sm");
+        String lg = previews.get("lg");
+        if (xs != null) {
+            artwork.setSmallImageUrl(xs);
+            changed = true;
+        }
+        if (sm != null) {
+            artwork.setMediumImageUrl(sm);
+            changed = true;
+        }
+        if (lg != null) {
+            artwork.setLargeImageUrl(lg);
+            changed = true;
+        }
+
+        if (changed) {
+            artworkRepository.save(artwork);
+            log.info("Updated Artwork '{}' image URLs from Artello previews", artwork.getTitle());
+        }
     }
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Keep WildFly from injecting its own stack so the Spring Boot WAR's bundled
+  implementations win:
+    - exclude the jaxrs subsystem  -> Spring MVC (@RestController) handles REST, not RESTEasy
+    - exclude the logging subsystem -> the app's logback-spring.xml controls logging
+    - exclude org.hibernate         -> the WAR's own Hibernate ORM is used (Spring Data JPA)
+-->
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.3">
+    <deployment>
+        <exclude-subsystems>
+            <subsystem name="jaxrs"/>
+            <subsystem name="logging"/>
+        </exclude-subsystems>
+        <exclusions>
+            <module name="org.hibernate"/>
+        </exclusions>
+    </deployment>
+</jboss-deployment-structure>

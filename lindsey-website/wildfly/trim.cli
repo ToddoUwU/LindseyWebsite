@@ -1,0 +1,98 @@
+# =============================================================================
+# trim.cli — generates /opt/wildfly/standalone/configuration/standalone-lindseywebsite.xml
+#
+# Usage (from anywhere):
+#   cp /opt/wildfly/standalone/configuration/standalone.xml \
+#      /opt/wildfly/standalone/configuration/standalone-lindseywebsite.xml
+#   /opt/wildfly/bin/jboss-cli.sh --file=wildfly/trim.cli
+#
+# Produces a lean profile for the Lindsey Website Spring Boot WAR:
+#   - keeps: logging, core-management, datasources+jca, deployment-scanner, ee,
+#            elytron, io, mail, naming, request-controller, transactions, undertow
+#   - WildFly-managed PostgreSQL datasource (java:/LindseyDS) + mail session
+#     (java:jboss/mail/Lindsey), TLS via Elytron using certs/keystore.p12
+# All secrets come from ${env.*}, exported by run.sh from .env.dev / .env.prod.
+# =============================================================================
+
+embed-server --server-config=standalone-lindseywebsite.xml --std-out=echo
+
+# --- Register PostgreSQL driver + datasource BEFORE removing ExampleDS --------
+/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-xa-datasource-class-name=org.postgresql.xa.PGXADataSource)
+/subsystem=datasources/data-source=LindseyDS:add(jndi-name=java:/LindseyDS,driver-name=postgresql,connection-url=jdbc:postgresql://${env.DB_HOST:localhost}:${env.DB_PORT:5432}/${env.POSTGRES_DB:lindseydb},user-name=${env.POSTGRES_USER},password=${env.POSTGRES_PASSWORD},min-pool-size=2,max-pool-size=10,enabled=true,use-java-context=true,valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker,exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter)
+
+# Repoint the EE default datasource binding, then drop the H2 ExampleDS + driver
+/subsystem=ee/service=default-bindings:write-attribute(name=datasource,value=java:/LindseyDS)
+/subsystem=datasources/data-source=ExampleDS:remove
+/subsystem=datasources/jdbc-driver=h2:remove
+
+# --- WildFly-managed mail session --------------------------------------------
+/subsystem=mail/mail-session=default:remove
+/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=mail-smtp:write-attribute(name=host,value=${env.SPRING_MAIL_HOST:smtp.gmail.com})
+/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=mail-smtp:write-attribute(name=port,value=${env.SPRING_MAIL_PORT:587})
+/subsystem=mail/mail-session=lindsey:add(jndi-name=java:jboss/mail/Lindsey,from=${env.SPRING_MAIL_USERNAME})
+/subsystem=mail/mail-session=lindsey/server=smtp:add(outbound-socket-binding-ref=mail-smtp,tls=true,username=${env.SPRING_MAIL_USERNAME},password=${env.SPRING_MAIL_PASSWORD})
+
+# --- TLS via Elytron using the project PKCS12 keystore -----------------------
+/subsystem=elytron/key-store=lindseyKS:add(path=${env.SSL_KEYSTORE_PATH},type=PKCS12,credential-reference={clear-text=${env.SSL_KEYSTORE_PASSWORD}})
+/subsystem=elytron/key-manager=lindseyKM:add(key-store=lindseyKS,credential-reference={clear-text=${env.SSL_KEYSTORE_PASSWORD}})
+/subsystem=elytron/server-ssl-context=lindseySSC:add(key-manager=lindseyKM,protocols=[TLSv1.3,TLSv1.2])
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=ssl-context,value=lindseySSC)
+
+# --- Remove unused subsystems (dependents before their dependencies) ---------
+/subsystem=microprofile-jwt-smallrye:remove
+/subsystem=microprofile-config-smallrye:remove
+/subsystem=metrics:remove
+/subsystem=health:remove
+/subsystem=jakarta-data:remove
+/subsystem=elytron-oidc-client:remove
+/subsystem=jdr:remove
+/subsystem=batch-jberet:remove
+/subsystem=sar:remove
+/subsystem=pojo:remove
+/subsystem=jmx:remove
+/subsystem=jaxrs:remove
+/subsystem=webservices:remove
+/subsystem=bean-validation:remove
+/subsystem=resource-adapters:remove
+/subsystem=distributable-web:remove
+/subsystem=distributable-ejb:remove
+/subsystem=ejb3:remove
+/subsystem=naming/service=remote-naming:remove
+/subsystem=remoting:remove
+/subsystem=discovery:remove
+/subsystem=jpa:remove
+/subsystem=ee-security:remove
+/subsystem=jsf:remove
+/subsystem=weld:remove
+/subsystem=infinispan:remove
+
+# --- Remove now-unused extensions --------------------------------------------
+/extension=org.wildfly.extension.microprofile.jwt-smallrye:remove
+/extension=org.wildfly.extension.microprofile.config-smallrye:remove
+/extension=org.wildfly.extension.metrics:remove
+/extension=org.wildfly.extension.health:remove
+/extension=org.wildfly.extension.jakarta.data:remove
+/extension=org.wildfly.extension.elytron-oidc-client:remove
+/extension=org.jboss.as.jdr:remove
+/extension=org.jboss.as.jmx:remove
+/extension=org.jboss.as.jsf:remove
+/extension=org.jboss.as.jaxrs:remove
+/extension=org.jboss.as.webservices:remove
+/extension=org.jboss.as.weld:remove
+/extension=org.wildfly.extension.batch.jberet:remove
+/extension=org.wildfly.extension.bean-validation:remove
+/extension=org.jboss.as.sar:remove
+/extension=org.jboss.as.pojo:remove
+/extension=org.wildfly.extension.ee-security:remove
+/extension=org.jboss.as.jpa:remove
+/extension=org.wildfly.extension.clustering.web:remove
+/extension=org.wildfly.extension.clustering.ejb:remove
+/extension=org.jboss.as.ejb3:remove
+/extension=org.jboss.as.remoting:remove
+/extension=org.wildfly.extension.discovery:remove
+/extension=org.jboss.as.clustering.infinispan:remove
+
+# --- Drop the unused AJP socket binding --------------------------------------
+/socket-binding-group=standard-sockets/socket-binding=ajp:remove
+
+stop-embedded-server

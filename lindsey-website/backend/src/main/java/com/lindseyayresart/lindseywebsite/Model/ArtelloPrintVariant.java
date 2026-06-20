@@ -76,6 +76,12 @@ public class ArtelloPrintVariant {
     @Column(name = "display_order")
     private Integer displayOrder = 0;
 
+    @Column(name = "artello_design_id", length = 50)
+    private String artelloDesignId;
+
+    @Embedded
+    private ArtelloGeometry geometry;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

@@ -1,6 +1,8 @@
 package com.lindseyayresart.lindseywebsite.Services;
 
 import com.lindseyayresart.lindseywebsite.Enums.OrderStatus;
+import com.lindseyayresart.lindseywebsite.Events.OrderPaidEvent;
+import com.lindseyayresart.lindseywebsite.Events.OrderShippedEvent;
 import com.lindseyayresart.lindseywebsite.Model.ArtelloPrintVariant;
 import com.lindseyayresart.lindseywebsite.Model.DTO.*;
 import com.lindseyayresart.lindseywebsite.Model.PrintOrder;
@@ -9,6 +11,7 @@ import com.lindseyayresart.lindseywebsite.Repository.PrintOrderRepository;
 import com.squareup.square.types.Payment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,7 @@ public class OrderService {
     private final ArtelloPrintVariantRepository variantRepository;
     private final SquarePaymentService squareService; // Hypothetical Square wrapper
     private final ArtelloService artelloService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public OrderConfirmation processCheckout(CheckoutRequest request) {
@@ -90,7 +94,17 @@ public class OrderService {
             orderRepository.save(order);
         }
 
-        // 7. Return Confirmation (Whether SUBMITTED or stayed PAID due to Artello error)
+        // 7. Fire the confirmation email after this transaction commits (see EmailService).
+        // The customer email travels in the event only — it is never persisted.
+        eventPublisher.publishEvent(new OrderPaidEvent(
+                order.getOrderReference(),
+                request.customerEmail(),
+                request.customerName(),
+                variant.getArtwork().getTitle(),
+                variant.getSize() + " " + variant.getFrameStyle(),
+                order.getTotalAmount()));
+
+        // 8. Return Confirmation (Whether SUBMITTED or stayed PAID due to Artello error)
         return new OrderConfirmation(
                 order.getOrderReference(),
                 variant.getArtwork().getTitle(),
@@ -112,7 +126,15 @@ public class OrderService {
             order.setTrackingNumber(payload.getTrackingNumber());
             order.setTrackingUrl(payload.getTrackingUrl());
             order.setShippingCarrier(payload.getCarrier());
-            // TODO: Trigger EmailService.sendTrackingEmail(order.getSquarePaymentId());
+            // Fire the tracking email after commit. EmailService re-fetches the customer email
+            // transiently from Square — we never stored it.
+            eventPublisher.publishEvent(new OrderShippedEvent(
+                    order.getOrderReference(),
+                    order.getSquarePaymentId(),
+                    order.getArtwork().getTitle(),
+                    payload.getTrackingNumber(),
+                    payload.getTrackingUrl(),
+                    payload.getCarrier()));
             log.info("Order {} marked as SHIPPED.", order.getOrderReference());
         } else if ("CANCELLED".equals(status)) {
             order.setStatus(OrderStatus.CANCELLED);

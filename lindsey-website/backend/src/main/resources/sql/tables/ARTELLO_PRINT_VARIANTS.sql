@@ -18,6 +18,15 @@ CREATE TABLE IF NOT EXISTS ARTELLO_PRINT_VARIANTS
     retail_price            DECIMAL(10, 2) NOT NULL, -- Customer pays this (cost + shipping + margin)
     is_available            BOOLEAN                 DEFAULT TRUE,
     display_order           INTEGER                 DEFAULT 0,
+    
+    -- Embedded Artello Design & Geometry
+    artello_design_id       VARCHAR(50),
+    geo_height              DECIMAL(12, 4),
+    geo_width               DECIMAL(12, 4),
+    geo_x                   DECIMAL(12, 4),
+    geo_y                   DECIMAL(12, 4),
+    geo_rotation            INTEGER,
+    
     created_at              TIMESTAMP               DEFAULT CURRENT_TIMESTAMP,
     updated_at              TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
 );

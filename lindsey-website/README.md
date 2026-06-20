@@ -4,22 +4,24 @@ A modern web application showcasing Lindsey Ayres' artwork, built with Spring Bo
 
 ## 🏗️ Architecture
 
-**Backend**: Spring Boot 3.4.1 with embedded Tomcat
+**Backend**: Spring Boot 3.4.5 packaged as a WAR, deployed on **WildFly 40 (Undertow)**
 - REST API with comprehensive artwork management
-- PostgreSQL database with JPA/Hibernate
-- Redis caching for performance
-- TLS/SSL encryption
+- PostgreSQL via a WildFly-managed JNDI datasource (`java:/LindseyDS`)
+- Mail via a WildFly-managed JNDI mail session (`java:jboss/mail/Lindsey`)
+- Caffeine in-memory caching
+- TLS/SSL terminated by Undertow/Elytron (`certs/keystore.p12`)
 - Image serving and processing
 
-**Frontend**: Angular 18 with TypeScript
+**Frontend**: Angular 21 with TypeScript
 - Responsive art gallery interface
 - Real-time search and filtering
 - Image optimization and lazy loading
+- Built into the WAR (`backend/src/main/resources/static/`)
 
-**Infrastructure**: Docker Compose
-- PostgreSQL 15 database
-- Redis 7 cache
-- Automated SSL certificate management
+**Infrastructure**:
+- WildFly 40 at `/opt/wildfly` running the trimmed `standalone-lindseywebsite.xml`
+- PostgreSQL 15 as a Docker Compose service
+- `run.sh` orchestrates both; self-signed SSL for dev
 
 ## 🚀 Quick Start
 
@@ -27,7 +29,9 @@ A modern web application showcasing Lindsey Ayres' artwork, built with Spring Bo
 - Java 21
 - Node.js 22+
 - Docker & Docker Compose
-- IntelliJ IDEA Ultimate (recommended)
+- WildFly 40 installed at `/opt/wildfly` (with the PostgreSQL JDBC module and
+  `standalone-lindseywebsite.xml` generated via `wildfly/trim.cli` — see CLAUDE.md)
+- IntelliJ IDEA Ultimate with the Jakarta EE / Application Servers plugin (recommended)
 
 ### 1. Clone & Setup
 ```bash
@@ -44,17 +48,15 @@ nano .env.dev  # Add database password
 
 ### 2. Start Development Environment
 ```bash
-# Start database and cache
-docker compose up -d postgres redis
-
-# Start the application
+# Starts Postgres (Docker), builds the WAR, deploys it, and runs WildFly
 ./run.sh dev
 ```
 
 ### 3. Access the Application
 - **HTTPS API**: https://localhost:8443/api/
-- **HTTP API**: http://localhost:8080/api/
-- **Frontend**: http://localhost:4200 (when Angular dev server is running)
+- **HTTP**: http://localhost:8080/ (also served by Undertow; use HTTPS in production)
+- **Frontend dev server**: http://localhost:4200 (when running `cd frontend && npm start`;
+  its proxy forwards `/api` and `/images` to https://localhost:8443)
 
 ## 📋 API Endpoints
 
@@ -104,13 +106,15 @@ POST /api/admin/cache/evict  # Clear all caches
 
 ### IntelliJ IDEA Configuration
 
-1. **Import Project**: Open as Maven project
-2. **Configure Tomcat**:
-   - File → Settings → Application Servers
-   - Add Tomcat Server pointing to `./tomcat/`
-3. **Run Configuration**:
-   - VM Options: `-Dspring.profiles.active=dev -Dspring.datasource.password=YOUR_DB_PASSWORD`
-   - Environment Variables: `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/lindseydb`
+1. **Import Project**: Open as a Maven project.
+2. **Register WildFly** (one-time): File → Settings → Build, Execution, Deployment →
+   Application Servers → add **WildFly 40.0.0.Final** pointing at `/opt/wildfly`
+   (requires the Jakarta EE / Application Servers plugin, Ultimate edition).
+3. **Run Configuration**: use the bundled **`WildFly (dev)`** config (`.run/`). It deploys
+   the `lindsey-website:war exploded` artifact at context root `/`, uses
+   `standalone-lindseywebsite.xml`, runs **Postgres(dev)** first, and sets the dev env vars.
+   If the server/artifact names don't auto-resolve, point them at your registered WildFly
+   server and the war-exploded artifact.
 
 ### Database Schema
 The application uses automatic schema creation. Key tables:
@@ -126,8 +130,8 @@ Images are stored in `backend/src/main/resources/Images/` with naming convention
 ## 🔒 Security Features
 
 ### HTTPS/TLS
-- Automatic HTTP → HTTPS redirects in production
-- HSTS (HTTP Strict Transport Security)
+- TLS terminated by WildFly/Undertow + Elytron (`certs/keystore.p12`)
+- HSTS (HTTP Strict Transport Security) header on secure requests
 - Content Security Policy (CSP)
 - XSS protection headers
 - Clickjacking prevention
@@ -166,16 +170,27 @@ Images are stored in `backend/src/main/resources/Images/` with naming convention
 # Update SSL_KEYSTORE_PASSWORD in .env.prod
 ```
 
-### Docker Commands
+### Postgres (Docker) Commands
 ```bash
-# Start all services
-docker compose --env-file .env.prod up -d
+# Start just the database
+docker compose --env-file .env.dev up -d postgres
 
-# Rebuild application
-docker compose --env-file .env.prod build --no-cache app
+# View database logs
+docker compose logs -f postgres
 
-# View logs
-docker compose logs -f app
+# Reset the database (drops the volume!)
+docker compose down -v && docker compose --env-file .env.dev up -d postgres
+```
+
+### WildFly
+```bash
+# Regenerate the trimmed profile after changing wildfly/trim.cli
+cp /opt/wildfly/standalone/configuration/standalone.xml \
+   /opt/wildfly/standalone/configuration/standalone-lindseywebsite.xml
+/opt/wildfly/bin/jboss-cli.sh --file=wildfly/trim.cli
+
+# Tail the server log
+tail -f /opt/wildfly/standalone/log/server.log
 ```
 
 ## 🔧 Configuration
@@ -246,18 +261,32 @@ sudo kill -9 <PID>
 **SSL Certificate Issues**
 ```bash
 # Regenerate dev certificate
-./generate-dev-cert.sh
+./run.sh cert
 
 # Check keystore
 keytool -list -v -keystore certs/keystore.p12
 ```
 
+**WildFly Won't Boot / Datasource Errors**
+```bash
+# Boot the profile directly to see errors
+SSL_KEYSTORE_PATH=$PWD/certs/keystore.p12 SSL_KEYSTORE_PASSWORD=changeit \
+POSTGRES_USER=toadMan POSTGRES_PASSWORD=... POSTGRES_DB=lindseydb \
+SPRING_MAIL_USERNAME=... SPRING_MAIL_PASSWORD=... \
+/opt/wildfly/bin/standalone.sh -c standalone-lindseywebsite.xml
+
+# Test the datasource (with Postgres running)
+/opt/wildfly/bin/jboss-cli.sh --connect \
+  '/subsystem=datasources/data-source=LindseyDS:test-connection-in-pool'
+```
+
 ### IntelliJ Issues
 
-**Tomcat Won't Start**
-- Check VM parameters include correct database password
-- Verify environment variables are set
-- Check Tomcat configuration points to correct directory
+**WildFly Won't Start**
+- Confirm the server is registered at `/opt/wildfly` and its config file is set to
+  `standalone-lindseywebsite.xml`.
+- Verify the `WildFly (dev)` env vars are present (datasource/mail/TLS use `${env.*}`).
+- Ensure the `lindsey-website:war exploded` artifact is selected for deployment.
 
 **Hot Reload Not Working**
 - Use "Update classes and resources" instead of restart
@@ -273,14 +302,14 @@ keytool -list -v -keystore certs/keystore.p12
 
 ### Logs
 ```bash
-# Application logs
-docker compose logs -f app
+# Application logs (WildFly)
+tail -f /opt/wildfly/standalone/log/server.log
 
 # Database logs
 docker compose logs -f postgres
 
-# All services
-docker compose logs -f
+# Both (via run.sh)
+./run.sh logs
 ```
 
 ## 🔄 Data Management
@@ -300,9 +329,9 @@ curl -X POST http://localhost:8080/api/admin/cache/evict
 ## 📚 Additional Resources
 
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [WildFly Documentation](https://docs.wildfly.org/)
 - [Angular Documentation](https://angular.io/docs)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Redis Documentation](https://redis.io/documentation)
 
 ## 🤝 Contributing
 

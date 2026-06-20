@@ -87,47 +87,8 @@ public class SecurityConfig {
         };
     }
 
-    /**
-     * Filter to redirect HTTP requests to HTTPS in production.
-     * Only active when the application is running in production environment.
-     * <p>
-     * Note: In production, it's recommended to use a reverse proxy (like Nginx)
-     * to handle HTTP to HTTPS redirects for better performance.
-     */
-    @Bean
-    public OncePerRequestFilter httpsRedirectFilter() {
-        return new OncePerRequestFilter() {
-            @Override
-            protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                            @NonNull HttpServletResponse response,
-                                            @NonNull FilterChain filterChain)
-                    throws ServletException, IOException {
-
-                // Only redirect in production (when ENVIRONMENT=prod)
-                String environment = System.getProperty("ENVIRONMENT",
-                        System.getenv("ENVIRONMENT"));
-                if (!"prod".equalsIgnoreCase(environment)) {
-                    filterChain.doFilter(request, response);
-                    return;
-                }
-
-                // If request is not secure (HTTP), redirect to HTTPS
-                if (!request.isSecure()) {
-                    String httpsUrl = "https://" + request.getServerName() +
-                            ":" + request.getServerPort() + request.getRequestURI();
-
-                    if (request.getQueryString() != null) {
-                        httpsUrl += "?" + request.getQueryString();
-                    }
-
-                    response.sendRedirect(httpsUrl);
-                    return;
-                }
-
-                filterChain.doFilter(request, response);
-            }
-        };
-    }
+    // HTTP->HTTPS redirection is handled by WildFly/Undertow (http-listener redirect-socket),
+    // so the former application-level httpsRedirectFilter has been removed.
 
     /**
      * CORS configuration for the application.

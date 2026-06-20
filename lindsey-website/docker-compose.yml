@@ -1,71 +1,18 @@
 # ============================================================
 # Docker Compose for Lindsey Website
 #
-# Usage:
-#   Development: ./run.sh dev     (https://localhost:8443)
-#   Production:  ./run.sh prod    (https://lindseyayres.art)
+# Provides ONLY the PostgreSQL database. The backend runs on WildFly 40 on the
+# host (see run.sh + standalone-lindseywebsite.xml), connecting to this DB on
+# localhost:${DB_PORT}.
 #
-# Architecture:
-#   - app: Spring Boot with embedded Tomcat + TLS + Caffeine cache
-#   - postgres: PostgreSQL database
+# Usage (via run.sh, which also launches WildFly):
+#   ./run.sh dev      Postgres + WildFly  (https://localhost:8443)
+#   ./run.sh prod     Postgres + WildFly  (https://localhost:443)
+# Or just the database:
+#   docker compose --env-file .env.dev up -d postgres
 # ============================================================
 
 services:
-  # ============================================================
-  # Spring Boot Application (with TLS)
-  # ============================================================
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - BUILD_TIMESTAMP=${BUILD_TIMESTAMP:-}
-    container_name: lindsey-app
-    ports:
-      - "${HTTPS_PORT:-443}:8443"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      # Database
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # JPA
-      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-validate}
-      SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL:-false}
-      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT:-org.hibernate.dialect.PostgreSQLDialect}
-      SPRING_JPA_OPEN_IN_VIEW: ${SPRING_JPA_OPEN_IN_VIEW:-false}
-      # Database Initialization
-      DB_RECREATE_TABLES: ${DB_RECREATE_TABLES:-false}
-      # TLS/SSL
-      SERVER_PORT: 8443
-      SERVER_SSL_ENABLED: "true"
-      SERVER_SSL_KEY_STORE: ${SSL_KEYSTORE_PATH:-/app/certs/keystore.p12}
-      SERVER_SSL_KEY_STORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD}
-      SERVER_SSL_KEY_STORE_TYPE: PKCS12
-      SERVER_SSL_KEY_ALIAS: ${SSL_KEY_ALIAS:-lindsey-website}
-      # Profile
-      ENVIRONMENT: ${ENVIRONMENT:-prod}
-      SPRING_PROFILES_ACTIVE: ${ENVIRONMENT:-prod}
-      # Logging
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      # Email
-      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.mail.yahoo.com}
-      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
-      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
-      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
-      # External APIs
-      EXTERNAL_API_LUMAPRINTS_API_KEY: ${EXTERNAL_API_LUMAPRINTS_API_KEY:-}
-      EXTERNAL_API_LUMAPRINTS_API_SECRET: ${EXTERNAL_API_LUMAPRINTS_API_SECRET:-}
-      EXTERNAL_API_ARTELLO_API_KEY: ${EXTERNAL_API_ARTELLO_API_KEY:-}
-      EXTERNAL_API_USE_SANDBOX: ${EXTERNAL_API_USE_SANDBOX:-false}
-    volumes:
-      - ./certs:/app/certs:ro
-    restart: unless-stopped
-    networks:
-      - lindsey-network
-
   # ============================================================
   # PostgreSQL Database
   # ============================================================

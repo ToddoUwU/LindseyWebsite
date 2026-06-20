@@ -70,7 +70,7 @@ public class SquarePaymentService {
             return clientOrder.getBuyerEmail();
         } catch (Exception e) {
             log.error("Failed to retrieve buyer email for payment {}", paymentId, e);
-            return null;
+            return Optional.empty();
         }
     }
 
