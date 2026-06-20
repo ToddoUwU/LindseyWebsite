@@ -1,6 +1,11 @@
 # lindseyWebsite
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.9.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 21.x.
+
+The production build outputs to `../backend/src/main/resources/static/`, where it is embedded
+into the Spring Boot WAR and served by WildFly. For local development run `npm start` — the
+dev server proxies `/api` and `/images` to the backend at `https://localhost:8443`
+(see `proxy.conf.json`).
 
 ## Development server
 

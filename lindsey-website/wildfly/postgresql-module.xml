@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Reference copy of the PostgreSQL JDBC driver module for WildFly.
+  Install to: /opt/wildfly/modules/system/layers/base/org/postgresql/main/module.xml
+  alongside postgresql-42.7.11.jar. JDK modules (java.*) must be declared explicitly.
+-->
+<module xmlns="urn:jboss:module:1.9" name="org.postgresql">
+    <resources>
+        <resource-root path="postgresql-42.7.11.jar"/>
+    </resources>
+    <dependencies>
+        <module name="java.sql"/>
+        <module name="java.naming"/>
+        <module name="java.management"/>
+        <module name="java.security.jgss"/>
+        <module name="jakarta.transaction.api"/>
+    </dependencies>
+</module>

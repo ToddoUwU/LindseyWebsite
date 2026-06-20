@@ -36,7 +36,8 @@ load_env() {
     if [ ! -f "$env_file" ]; then
         echo -e "${RED}Error: $env_file not found!${NC}"; exit 1
     fi
-    set -a; source "$env_file"; set +a
+    set -a; # shellcheck source=/dev/null
+    source "$env_file"; set +a
 
     # WildFly runs on the host (not in the compose network), so Postgres is on localhost.
     export DB_HOST="${DB_HOST:-localhost}"
@@ -54,7 +55,7 @@ load_env() {
 
 wait_for_postgres() {
     echo -e "${YELLOW}Waiting for Postgres...${NC}"
-    for i in $(seq 1 30); do
+    for _ in $(seq 1 30); do
         if $DOCKER_COMPOSE exec -T postgres pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" >/dev/null 2>&1; then
             echo -e "${GREEN}Postgres is ready.${NC}"; return 0
         fi

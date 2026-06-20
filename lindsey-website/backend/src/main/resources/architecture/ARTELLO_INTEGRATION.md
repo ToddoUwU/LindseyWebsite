@@ -43,7 +43,7 @@ published API docs**. Everything below was verified against a real saved product
 
 ### Top-level shape
 
-```json
+```jsonc
 {
   "id": "…",
   "name": "Souls Fragility",
@@ -58,7 +58,7 @@ published API docs**. Everything below was verified against a real saved product
 
 ### A product option (one variant)
 
-```json
+```jsonc
 {
   "id": "e373d9e2-…",          // the arteloProductId — what an order references
   "catalogProductId": "IndividualArtPrint",
@@ -80,7 +80,7 @@ published API docs**. Everything below was verified against a real saved product
 
 ### A design (image placement) — **NOTE: shape differs from the docs**
 
-```json
+```jsonc
 {
   "id": "477d071a-…",          // per-variant design id (unique per product option)
   "image": {

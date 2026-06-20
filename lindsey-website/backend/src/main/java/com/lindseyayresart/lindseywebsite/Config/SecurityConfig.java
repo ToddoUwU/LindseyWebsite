@@ -8,10 +8,20 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -35,6 +45,12 @@ public class SecurityConfig {
 
     @Value("${ALLOWED_ORIGINS:http://localhost:4200}")
     private String allowedOrigins;
+
+    @Value("${app.admin.username:admin}")
+    private String adminUsername;
+
+    @Value("${app.admin.password:}")
+    private String adminPassword;
 
     /**
      * Filter to add security headers to all responses.
@@ -87,8 +103,9 @@ public class SecurityConfig {
         };
     }
 
-    // HTTP->HTTPS redirection is handled by WildFly/Undertow (http-listener redirect-socket),
-    // so the former application-level httpsRedirectFilter has been removed.
+    // TLS termination and any HTTP->HTTPS handling now live at the WildFly/Undertow layer
+    // (or a fronting reverse proxy), so the former application-level httpsRedirectFilter
+    // has been removed.
 
     /**
      * CORS configuration for the application.
@@ -133,31 +150,73 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Password encoder for the in-memory admin account.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Single in-memory ADMIN account used to protect the mutating/admin endpoints.
+     * <p>
+     * Fails CLOSED: if no admin password is configured (app.admin.password / ADMIN_PASSWORD),
+     * NO user is registered, so every protected endpoint returns 401 rather than being open.
+     */
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+        if (adminPassword == null || adminPassword.isBlank()) {
+            return new InMemoryUserDetailsManager();
+        }
+        UserDetails admin = User.withUsername(adminUsername)
+                .password(passwordEncoder.encode(adminPassword))
+                .roles("ADMIN")
+                .build();
+        return new InMemoryUserDetailsManager(admin);
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Disable the login form and basic auth completely
+                // No browser login form; admin endpoints use HTTP Basic (configured below).
                 .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
 
-                // 2. Disable CSRF (essential for your Post-Payment webhooks/APIs)
+                // Stateless API: no server-side sessions.
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // CSRF disabled: stateless API with no cookie-based auth (HTTP Basic),
+                // and inbound payment/fulfilment webhooks must POST without a CSRF token.
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 3. Attach your existing CORS config
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // 4. Define who can see what
+                // NOTE: antMatcher(...) forces AntPathRequestMatcher. As a Spring Boot WAR on an
+                // external servlet container, MvcRequestMatcher (the default) matches
+                // unreliably, so all rules below are explicit ant matchers.
                 .authorizeHttpRequests(auth -> auth
-                        // Open up the art and checkout endpoints
-                        .requestMatchers("/", "/index.html", "/static/**", "/*.js", "/*.css").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/api/order/**").permitAll()
-                        .requestMatchers("/api/artello/webhook").permitAll()
+                        // Angular SPA shell + static assets + served images
+                        .requestMatchers(antMatcher("/"), antMatcher("/index.html"),
+                                antMatcher("/favicon.ico"), antMatcher("/*.js"), antMatcher("/*.css"),
+                                antMatcher("/static/**"), antMatcher("/assets/**"),
+                                antMatcher("/images/**"), antMatcher("/media/**")).permitAll()
+                        // Health probe + Spring Boot's error dispatch (so 4xx/5xx on public
+                        // endpoints aren't re-secured into a misleading 401)
+                        .requestMatchers(antMatcher("/api/health"), antMatcher("/error")).permitAll()
+                        // Public customer-facing form submissions (rate-limited upstream)
+                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/contact"),
+                                antMatcher(HttpMethod.POST, "/api/inquiry")).permitAll()
+                        // Public checkout + inbound webhooks (present or future)
+                        .requestMatchers(antMatcher("/api/public/**"), antMatcher("/api/order/**"),
+                                antMatcher("/api/artello/webhook"), antMatcher("/api/square/webhook")).permitAll()
+                        // All read-only gallery/product data is public
+                        .requestMatchers(antMatcher(HttpMethod.GET, "/api/**")).permitAll()
+                        // Everything else — admin cache eviction, product create/update/delete,
+                        // and any future mutating endpoint — requires the ADMIN role.
+                        .anyRequest().hasRole("ADMIN")
+                )
+                .httpBasic(Customizer.withDefaults());
 
-                        // Since you're doing everything via .sh scripts,
-                        // we'll permit everything else for now so Spring stops asking for a login.
-                        .anyRequest().permitAll()
-                );
         http.addFilterBefore(securityHeadersFilter(), org.springframework.security.web.header.HeaderWriterFilter.class);
         return http.build();
     }
