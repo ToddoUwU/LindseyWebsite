@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, inject, signal} from '@angular/core';
+import {Component, ElementRef, HostListener, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
@@ -10,6 +10,7 @@ import {FilterService} from '../../services/filter.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, MatButtonModule, MatIconModule],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {

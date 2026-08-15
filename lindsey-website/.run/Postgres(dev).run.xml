@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Postgres(dev)" type="docker-deploy" factoryName="docker-compose.yml" server-name="postgres">
+    <deployment type="docker-compose.yml">
+      <settings>
+        <option name="envFilePath" value="$PROJECT_DIR$/.env.dev" />
+        <option name="envFilePaths">
+          <list>
+            <option value="$PROJECT_DIR$/.env.dev" />
+          </list>
+        </option>
+        <option name="services">
+          <list>
+            <option value="postgres" />
+          </list>
+        </option>
+        <option name="sourceFilePath" value="docker-compose.yml" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>

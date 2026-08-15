@@ -1,10 +1,6 @@
 package com.lindseyayresart.lindseywebsite.Services;
 
-import com.lindseyayresart.lindseywebsite.Model.ArtelloDesign;
-import com.lindseyayresart.lindseywebsite.Model.ArtelloGeometry;
-import com.lindseyayresart.lindseywebsite.Model.ArtelloPrintVariant;
-import com.lindseyayresart.lindseywebsite.Model.ArtelloProductInfo;
-import com.lindseyayresart.lindseywebsite.Model.Artwork;
+import com.lindseyayresart.lindseywebsite.Model.*;
 import com.lindseyayresart.lindseywebsite.Model.DTO.ArtelloProductSet;
 import com.lindseyayresart.lindseywebsite.Repository.ArtelloPrintVariantRepository;
 import com.lindseyayresart.lindseywebsite.Repository.ArtworkRepository;

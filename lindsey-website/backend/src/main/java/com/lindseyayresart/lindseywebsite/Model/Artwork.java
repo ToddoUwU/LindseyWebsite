@@ -118,6 +118,7 @@ public class Artwork implements Serializable {
 
 
     @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<ArtworkProduct> products = new ArrayList<>();
 
     /**

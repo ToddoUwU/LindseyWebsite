@@ -4,11 +4,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.NonNull;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,7 +21,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -191,30 +190,31 @@ public class SecurityConfig {
 
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // NOTE: antMatcher(...) forces AntPathRequestMatcher. As a Spring Boot WAR on an
+                // NOTE: (...) forces AntPathRequestMatcher. As a Spring Boot WAR on an
                 // external servlet container, MvcRequestMatcher (the default) matches
                 // unreliably, so all rules below are explicit ant matchers.
                 .authorizeHttpRequests(auth -> auth
                         // Angular SPA shell + static assets + served images
-                        .requestMatchers(antMatcher("/"), antMatcher("/index.html"),
-                                antMatcher("/favicon.ico"), antMatcher("/*.js"), antMatcher("/*.css"),
-                                antMatcher("/static/**"), antMatcher("/assets/**"),
-                                antMatcher("/images/**"), antMatcher("/media/**")).permitAll()
+                        .requestMatchers(("/"), ("/index.html"),
+                                ("/favicon.ico"), ("/*.js"), ("/*.css"),
+                                ("/static/**"), ("/assets/**"),
+                                ("/images/**"), ("/media/**")).permitAll()
                         // Health probe + Spring Boot's error dispatch (so 4xx/5xx on public
                         // endpoints aren't re-secured into a misleading 401)
-                        .requestMatchers(antMatcher("/api/health"), antMatcher("/error")).permitAll()
+                        .requestMatchers(("/api/health"), ("/error")).permitAll()
                         // Public customer-facing form submissions (rate-limited upstream)
-                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/contact"),
-                                antMatcher(HttpMethod.POST, "/api/inquiry")).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/contact", "/api/inquiry").permitAll()
                         // Public checkout + inbound webhooks (present or future)
-                        .requestMatchers(antMatcher("/api/public/**"), antMatcher("/api/order/**"),
-                                antMatcher("/api/artello/webhook"), antMatcher("/api/square/webhook")).permitAll()
+                        .requestMatchers(("/api/public/**"), ("/api/order/**"),
+                                ("/api/artello/webhook"), ("/api/square/webhook")).permitAll()
                         // All read-only gallery/product data is public
-                        .requestMatchers(antMatcher(HttpMethod.GET, "/api/**")).permitAll()
-                        // Everything else — admin cache eviction, product create/update/delete,
+                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                        // Everything else in the API namespace — admin cache eviction, product create/update/delete,
                         // and any future mutating endpoint — requires the ADMIN role.
-                        .anyRequest().hasRole("ADMIN")
-                )
+                        .requestMatchers("/api/**").hasRole("ADMIN")
+                        // All other non-API requests (like SPA routes) are permitted to fall through to the ErrorController and be forwarded to the SPA.
+                        .anyRequest().permitAll())
+
                 .httpBasic(Customizer.withDefaults());
 
         http.addFilterBefore(securityHeadersFilter(), org.springframework.security.web.header.HeaderWriterFilter.class);

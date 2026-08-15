@@ -1,4 +1,4 @@
-import {Component, inject, input, output} from '@angular/core';
+import {Component, inject, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -10,6 +10,7 @@ import {ProductService} from '../../services/product.service';
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule],
   templateUrl: './product-card.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './product-card.component.scss'
 })
 export class ProductCardComponent {

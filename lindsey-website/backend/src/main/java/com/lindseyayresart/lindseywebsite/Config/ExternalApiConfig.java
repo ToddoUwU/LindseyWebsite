@@ -17,7 +17,11 @@ import org.springframework.context.annotation.Configuration;
 public class ExternalApiConfig {
 
     // Getters and setters
-    // Lumaprints API Configuration
+    /* Lumaprints API Configuration
+    Currently Lumaprints is not used
+    Comment out for now
+
+
     @Getter
     private String lumaprintsApiKey;
     @Getter
@@ -25,13 +29,6 @@ public class ExternalApiConfig {
     private String lumaprintsBaseUrl = "https://api.lumaprints.com"; // Production URL
     @Getter
     private String lumaprintsSandboxUrl = "https://sandbox-api.lumaprints.com"; // Sandbox URL
-
-    // Artello API Configuration
-    @Getter
-    private String artelloApiKey;
-    @Getter
-    private String artelloBaseUrl = "https://www.artelo.io/api";
-
     // Environment flag to use sandbox vs production
     @Getter
     private boolean useSandbox = false;
@@ -43,7 +40,7 @@ public class ExternalApiConfig {
     /**
      * Generate Basic Auth header for Lumaprints API.
      * Format: "Basic " + Base64(apiKey:apiSecret)
-     */
+
     public String getLumaprintsBasicAuth() {
         if (lumaprintsApiKey == null || lumaprintsApiSecret == null) {
             throw new IllegalStateException("Lumaprints API key and secret must be configured");
@@ -51,6 +48,14 @@ public class ExternalApiConfig {
         String credentials = lumaprintsApiKey + ":" + lumaprintsApiSecret;
         return "Basic " + java.util.Base64.getEncoder().encodeToString(credentials.getBytes());
     }
+    */
+
+    // Artello API Configuration
+    @Getter
+    private String artelloApiKey;
+    @Getter
+    private String artelloBaseUrl = "https://www.artelo.io/api";
+
 
     /**
      * Get Bearer token header for Artello API.

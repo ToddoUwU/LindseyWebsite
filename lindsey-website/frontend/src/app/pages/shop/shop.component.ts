@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ProductService} from '../../services/product.service';
@@ -10,6 +10,7 @@ import {ArtworkProduct} from '../../models/api.model';
   standalone: true,
   imports: [CommonModule, RouterLink, ProductCardComponent],
   templateUrl: './shop.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './shop.component.scss'
 })
 export class ShopComponent implements OnInit {

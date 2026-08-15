@@ -16,7 +16,7 @@ public class SquareConfig {
     private String accessToken;
     private String locationId;
     private String applicationId;  // Public, needed by frontend SDK
-    private boolean useSandbox = false;
+    private boolean useSandbox = true;
 
     @Bean
     public SquareClient squareClient() {

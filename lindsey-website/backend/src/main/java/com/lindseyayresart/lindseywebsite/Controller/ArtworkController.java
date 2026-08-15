@@ -143,7 +143,7 @@ public class ArtworkController {
 
         try {
             return artworkService.getArtworkById(id)
-                    .map(artwork -> {
+                    .map((Artwork artwork) -> {
                         logger.info("Returning artwork: {}", artwork.getTitle());
                         return ResponseEntity.ok(artwork);
                     })

@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, input, OnDestroy, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -10,6 +10,7 @@ import {environment} from '../../../environments/environment';
   selector: 'app-carousel',
   imports: [CommonModule, NgOptimizedImage, MatButtonModule, MatIconModule],
   templateUrl: './carousel.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './carousel.scss',
 })
 export class Carousel implements OnInit, OnDestroy {

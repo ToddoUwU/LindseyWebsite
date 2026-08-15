@@ -94,11 +94,11 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
      * Native query required because categories are stored as "Cat1,Cat2,Cat3"
      */
     @Query(value = """
-            SELECT DISTINCT TRIM(unnest(string_to_array(categories, ','))) as category
-            FROM artworks 
-            WHERE categories IS NOT NULL AND categories != ''
-            ORDER BY category
-            """, nativeQuery = true)
+             SELECT DISTINCT TRIM(unnest(string_to_array(categories, ','))) as category
+             FROM artworks
+             WHERE categories IS NOT NULL AND categories != ''
+             ORDER BY category
+            \s""", nativeQuery = true)
     Set<String> findAllUniqueCategories();
 
     /**

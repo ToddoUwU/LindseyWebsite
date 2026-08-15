@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit} from '@angular/core';
+import {Component, computed, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -26,6 +26,7 @@ import {FilterService} from '../../services/filter.service';
     Carousel
   ],
   templateUrl: './home.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {

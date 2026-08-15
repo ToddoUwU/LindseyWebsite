@@ -1,4 +1,4 @@
-import {Component, signal} from '@angular/core';
+import {Component, signal, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ContactService} from '../../services/contact.service';
@@ -8,6 +8,7 @@ import {ContactService} from '../../services/contact.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './contact.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './contact.component.scss'
 })
 export class ContactComponent {

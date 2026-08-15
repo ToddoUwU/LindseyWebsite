@@ -1,4 +1,4 @@
-import {Component, effect, HostListener, inject, signal, ViewChild} from '@angular/core';
+import {Component, effect, HostListener, inject, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -12,6 +12,7 @@ import {Router} from '@angular/router';
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, NgOptimizedImage, InquiryDialogComponent],
   templateUrl: './artwork-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './artwork-dialog.component.scss'
 })
 export class ArtworkDialogComponent {

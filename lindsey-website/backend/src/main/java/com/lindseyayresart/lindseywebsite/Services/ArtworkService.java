@@ -10,9 +10,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service layer for Artwork operations.
@@ -111,9 +110,22 @@ public class ArtworkService {
     @Cacheable(value = "categories")
     public Set<String> getUniqueCategories() {
         logger.info("Fetching unique categories from database");
-        Set<String> categories = artworkRepository.findAllUniqueCategories();
+        Set<String> categories = new HashSet<>();
+        for (String s : artworkRepository.findAllUniqueCategories()) {
+            logger.info("Processing category: {}", s);
+            String lowerCase = s.toLowerCase();
+            String normalized = Arrays.stream(lowerCase.split("\\s+"))
+                    .map(word ->
+                            word.replaceFirst(word.substring(0, 1), word.substring(0, 1).toUpperCase())
+                    ).collect(Collectors.joining(" "));
+
+            //its a set bro
+            categories.add(normalized);
+
+            logger.info("Normalized category: {}", normalized);
+        }
         logger.info("Found {} unique categories", categories.size());
-        return categories;
+        return categories.stream().sorted(Comparator.comparing(String::toString)).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     // ============================================================
@@ -129,6 +141,21 @@ public class ArtworkService {
         logger.info("Fetching unique dimensions from database");
         List<String> dimensions = artworkRepository.findDistinctDimensions();
         logger.info("Found {} unique dimensions", dimensions.size());
+        logger.info("Before sorting: {}", dimensions);
+        dimensions.sort(Comparator.comparing(s -> {
+            //legit just splitting on "x meaning a 10"x17" is now an array with
+            // [10"x, 17"]
+            String[] d = s.split("\"x");
+            logger.info("First dimension: {}", d[0]);
+            logger.info("Second dimension: {}", d[1]);
+            if (d[0].contains(".")) {
+                return String.format("%4s%3s", d[0], d[1]);
+            } else {
+                return String.format("%2s%3s", d[0], d[1]);
+            }
+        }));
+
+        logger.info("After sorting: {}", dimensions);
         return dimensions;
     }
 

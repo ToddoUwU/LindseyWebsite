@@ -1,4 +1,4 @@
-import {Component, computed, effect, HostListener, inject, input, OnDestroy, OnInit, output, signal} from '@angular/core';
+import {Component, computed, effect, HostListener, inject, input, OnDestroy, OnInit, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -26,6 +26,7 @@ import {FilterService} from '../../services/filter.service';
     MatInputModule
   ],
   templateUrl: './artwork-filter.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './artwork-filter.component.scss'
 })
 export class ArtworkFilterComponent implements OnInit, OnDestroy {
