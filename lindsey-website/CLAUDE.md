@@ -51,12 +51,8 @@ lindsey-website/
 The backend deploys as a WAR onto WildFly 40 at `/opt/wildfly`. Key pieces:
 - **Trimmed profile**: `standalone-lindseywebsite.xml` keeps only 13 subsystems
   (undertow, ee, io, naming, datasources+jca, mail, transactions, elytron, logging,
-  deployment-scanner, core-management, request-controller). Regenerate it with:
-  ```bash
-  cp /opt/wildfly/standalone/configuration/standalone.xml \
-     /opt/wildfly/standalone/configuration/standalone-lindseywebsite.xml
-  /opt/wildfly/bin/jboss-cli.sh --file=wildfly/trim.cli
-  ```
+  deployment-scanner, core-management, request-controller).
+  *Note:* The fully generated config is tracked in version control at `wildfly/standalone-lindseywebsite.xml` to avoid manual CLI steps; `run.sh` copies it automatically. However, **you must keep `wildfly/trim.cli` up to date** so it can be re-run whenever you upgrade to a new major version of WildFly.
 - **PostgreSQL driver module**: `/opt/wildfly/modules/system/layers/base/org/postgresql/main/`
   (jar + `module.xml`), registered as the `postgresql` driver.
 - **JNDI resources**: datasource `java:/LindseyDS`, mail session `java:jboss/mail/Lindsey`.

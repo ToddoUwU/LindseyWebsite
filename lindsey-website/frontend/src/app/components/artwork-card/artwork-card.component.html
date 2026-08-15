@@ -14,6 +14,7 @@
     <img
       [alt]="artwork.title || 'Artwork'"
       ngSrc="{{ getSmallImageUrl() }}"
+      [priority]="priority"
       decoding="async"
       [width]="getSmallImageWidth()"
       [height]="getSmallImageHeight()"

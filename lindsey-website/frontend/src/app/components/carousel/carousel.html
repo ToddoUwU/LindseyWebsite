@@ -39,6 +39,7 @@
                 class="carousel-image"
                 [width]="artwork.smallImageWidth"
                 [height]="artwork.smallImageHeight"
+                [priority]="i === 0"
               />
             } @else {
               <img
@@ -47,6 +48,7 @@
                 class="carousel-image"
                 [width]="artwork.smallImageWidth"
                 [height]="artwork.smallImageHeight"
+                [priority]="i === 0"
               />
             }
 

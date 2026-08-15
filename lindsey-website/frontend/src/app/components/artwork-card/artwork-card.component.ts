@@ -15,6 +15,7 @@ import { environment } from '../../../environments/environment';
 export class ArtworkCardComponent {
   // Artwork is a plain object passed from parent (HomeComponent)
   @Input() artwork!: Artwork;
+  @Input() priority = false;
   @Output() artworkSelected = new EventEmitter<Artwork>();
 
   imageLoaded = false;

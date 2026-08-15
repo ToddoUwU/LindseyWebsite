@@ -87,9 +87,8 @@ start_stack() {
     if [ ! -f "$PROJECT_DIR/certs/keystore.p12" ]; then
         echo -e "${RED}No SSL certificate found. Run './run.sh cert' first.${NC}"; exit 1
     fi
-    if [ ! -f "$WILDFLY_HOME/standalone/configuration/$WILDFLY_CONFIG" ]; then
-        echo -e "${RED}$WILDFLY_CONFIG not found in $WILDFLY_HOME. Generate it with wildfly/trim.cli.${NC}"; exit 1
-    fi
+    echo -e "${GREEN}Copying configuration to WildFly...${NC}"
+    cp "$PROJECT_DIR/wildfly/$WILDFLY_CONFIG" "$WILDFLY_HOME/standalone/configuration/$WILDFLY_CONFIG"
     $DOCKER_COMPOSE --env-file "$env_file" up -d postgres
     wait_for_postgres
     build_war
@@ -157,7 +156,6 @@ case $COMMAND in
         echo ""
         echo "First-time setup:"
         echo "  1. ./run.sh cert                                   # self-signed keystore"
-        echo "  2. Generate wildfly/trim.cli -> standalone-lindseywebsite.xml (see CLAUDE.md)"
-        echo "  3. ./run.sh dev"
+        echo "  2. ./run.sh dev"
         ;;
 esac

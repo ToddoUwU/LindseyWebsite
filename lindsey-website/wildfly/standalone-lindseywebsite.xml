@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <server xmlns="urn:jboss:domain:community:20.0">
     <extensions>
         <extension module="org.jboss.as.connector"/>
         <extension module="org.jboss.as.deployment-scanner"/>
         <extension module="org.jboss.as.ee"/>
-        <extension module="org.jboss.as.jpa"/>
         <extension module="org.jboss.as.logging"/>
         <extension module="org.jboss.as.mail"/>
         <extension module="org.jboss.as.naming"/>
         <extension module="org.jboss.as.transactions"/>
-        <extension module="org.wildfly.extension.bean-validation"/>
         <extension module="org.wildfly.extension.core-management"/>
         <extension module="org.wildfly.extension.elytron"/>
         <extension module="org.wildfly.extension.io"/>
@@ -62,6 +61,21 @@
                 <suffix value=".yyyy-MM-dd"/>
                 <append value="true"/>
             </periodic-rotating-file-handler>
+            <logger category="com.arjuna">
+                <level name="WARN"/>
+            </logger>
+            <logger category="com.networknt.schema">
+                <level name="WARN"/>
+            </logger>
+            <logger category="io.jaegertracing.Configuration">
+                <level name="WARN"/>
+            </logger>
+            <logger category="org.jboss.as.config">
+                <level name="DEBUG"/>
+            </logger>
+            <logger category="sun.rmi">
+                <level name="WARN"/>
+            </logger>
             <root-logger>
                 <level name="INFO"/>
                 <handlers>
@@ -76,17 +90,21 @@
                 <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
             </formatter>
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:bean-validation:1.0"/>
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:7.2">
             <datasources>
-                <datasource jndi-name="java:jboss/datasources/LindseyDS" pool-name="LindseyDS" enabled="true" use-java-context="true">
-                    <connection-url>jdbc:postgresql://${env.POSTGRES_HOST:localhost}:${env.DB_PORT:5432}/${env.POSTGRES_DB:lindseydb}</connection-url>
+                <datasource jndi-name="java:/LindseyDS" pool-name="LindseyDS" enabled="true" use-java-context="true">
+                    <connection-url>jdbc:postgresql://${env.DB_HOST:localhost}:${env.DB_PORT:5432}/${env.POSTGRES_DB:lindseydb}</connection-url>
                     <driver>postgresql</driver>
-                    <security>
-                        <user-name>${env.POSTGRES_USER:postgres}</user-name>
-                        <password>${env.POSTGRES_PASSWORD:postgres}</password>
-                    </security>
+                    <pool>
+                        <min-pool-size>2</min-pool-size>
+                        <max-pool-size>10</max-pool-size>
+                    </pool>
+                    <security user-name="${env.POSTGRES_USER}" password="${env.POSTGRES_PASSWORD}"/>
+                    <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker"/>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter"/>
+                    </validation>
                 </datasource>
                 <drivers>
                     <driver name="postgresql" module="org.postgresql">
@@ -114,7 +132,7 @@
                     <managed-scheduled-executor-service name="default" jndi-name="java:jboss/ee/concurrency/scheduler/default" context-service="default" hung-task-termination-period="0" hung-task-threshold="60000" keepalive-time="3000"/>
                 </managed-scheduled-executor-services>
             </concurrent>
-            <default-bindings context-service="java:jboss/ee/concurrency/context/default" datasource="java:jboss/datasources/LindseyDS" managed-executor-service="java:jboss/ee/concurrency/executor/default" managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default" managed-thread-factory="java:jboss/ee/concurrency/factory/default"/>
+            <default-bindings context-service="java:jboss/ee/concurrency/context/default" datasource="java:/LindseyDS" managed-executor-service="java:jboss/ee/concurrency/executor/default" managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default" managed-thread-factory="java:jboss/ee/concurrency/factory/default"/>
         </subsystem>
         <subsystem xmlns="urn:wildfly:elytron:19.0" final-providers="combined-providers" disallowed-providers="OracleUcrypto">
             <providers>
@@ -170,7 +188,11 @@
                 <permission-set name="login-permission">
                     <permission class-name="org.wildfly.security.auth.permission.LoginPermission"/>
                 </permission-set>
-                <permission-set name="default-permissions"/>
+                <permission-set name="default-permissions">
+                    <permission class-name="org.wildfly.transaction.client.RemoteTransactionPermission" module="org.wildfly.transaction.client"/>
+                    <permission class-name="org.jboss.ejb.client.RemoteEJBPermission" module="org.jboss.ejb-client"/>
+                    <permission class-name="org.wildfly.extension.batch.jberet.deployment.BatchPermission" module="org.wildfly.extension.batch.jberet" target-name="*"/>
+                </permission-set>
             </permission-sets>
             <http>
                 <http-authentication-factory name="application-http-authentication" security-domain="ApplicationDomain" http-server-mechanism-factory="global">
@@ -226,14 +248,23 @@
                         <implementation type="JKS"/>
                         <file path="application.keystore" relative-to="jboss.server.config.dir"/>
                     </key-store>
+                    <key-store name="lindseyKS">
+                        <credential-reference clear-text="${env.SSL_KEYSTORE_PASSWORD}"/>
+                        <implementation type="PKCS12"/>
+                        <file path="${env.SSL_KEYSTORE_PATH}"/>
+                    </key-store>
                 </key-stores>
                 <key-managers>
                     <key-manager name="applicationKM" key-store="applicationKS" generate-self-signed-certificate-host="localhost">
                         <credential-reference clear-text="password"/>
                     </key-manager>
+                    <key-manager name="lindseyKM" key-store="lindseyKS">
+                        <credential-reference clear-text="${env.SSL_KEYSTORE_PASSWORD}"/>
+                    </key-manager>
                 </key-managers>
                 <server-ssl-contexts>
                     <server-ssl-context name="applicationSSC" key-manager="applicationKM"/>
+                    <server-ssl-context name="lindseySSC" protocols="TLSv1.3 TLSv1.2" key-manager="lindseyKM"/>
                 </server-ssl-contexts>
             </tls>
         </subsystem>
@@ -259,17 +290,12 @@
             </default-workmanager>
             <cached-connection-manager/>
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:jpa:1.1">
-            <jpa default-extended-persistence-inheritance="DEEP"/>
-        </subsystem>
         <subsystem xmlns="urn:jboss:domain:mail:4.0">
-            <mail-session name="default" jndi-name="java:jboss/mail/LindseyMail">
-                <smtp-server outbound-socket-binding-ref="mail-smtp" username="${env.SPRING_MAIL_USERNAME:''}" password="${env.SPRING_MAIL_PASSWORD:''}" tls="true"/>
+            <mail-session name="lindsey" jndi-name="java:jboss/mail/Lindsey" from="${env.SPRING_MAIL_USERNAME}">
+                <smtp-server outbound-socket-binding-ref="mail-smtp" tls="true" username="${env.SPRING_MAIL_USERNAME}" password="${env.SPRING_MAIL_PASSWORD}"/>
             </mail-session>
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:naming:2.0">
-            <remote-naming/>
-        </subsystem>
+        <subsystem xmlns="urn:jboss:domain:naming:2.0"/>
         <subsystem xmlns="urn:jboss:domain:request-controller:1.0"/>
         <subsystem xmlns="urn:jboss:domain:transactions:6.0">
             <core-environment node-identifier="${jboss.tx.node.id:1}">
@@ -286,11 +312,11 @@
             <buffer-cache name="default"/>
             <server name="default-server">
                 <http-listener name="default" socket-binding="http" redirect-socket="https" enable-http2="true"/>
-                <https-listener name="https" socket-binding="https" ssl-context="applicationSSC" enable-http2="true"/>
+                <https-listener name="https" socket-binding="https" ssl-context="lindseySSC" enable-http2="true"/>
                 <host name="default-host" alias="localhost">
                     <location name="/" handler="welcome-content"/>
-                    <http-invoker http-authentication-factory="application-http-authentication"/>
                     <filter-ref name="gzip"/>
+                    <http-invoker http-authentication-factory="application-http-authentication"/>
                 </host>
             </server>
             <servlet-container name="default">
@@ -317,7 +343,6 @@
         </interface>
     </interfaces>
     <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
-        <socket-binding name="ajp" port="${jboss.ajp.port:8009}"/>
         <socket-binding name="http" port="${jboss.http.port:8080}"/>
         <socket-binding name="https" port="${jboss.https.port:8443}"/>
         <socket-binding name="management-http" interface="management" port="${jboss.management.http.port:9990}"/>
@@ -325,7 +350,7 @@
         <socket-binding name="txn-recovery-environment" port="4712"/>
         <socket-binding name="txn-status-manager" port="4713"/>
         <outbound-socket-binding name="mail-smtp">
-            <remote-destination host="${env.SPRING_MAIL_HOST:smtp.mail.yahoo.com}" port="${env.SPRING_MAIL_PORT:587}"/>
+            <remote-destination host="${env.SPRING_MAIL_HOST:smtp.gmail.com}" port="${env.SPRING_MAIL_PORT:587}"/>
         </outbound-socket-binding>
     </socket-binding-group>
 </server>

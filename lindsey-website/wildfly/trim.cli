@@ -38,6 +38,10 @@ embed-server --server-config=standalone-lindseywebsite.xml --std-out=echo
 /subsystem=elytron/server-ssl-context=lindseySSC:add(key-manager=lindseyKM,protocols=[TLSv1.3,TLSv1.2])
 /subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=ssl-context,value=lindseySSC)
 
+# --- Enable GZIP compression in Undertow --------------------------------------
+/subsystem=undertow/configuration=filter/gzip=gzip:add()
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=gzip:add()
+
 # --- Remove unused subsystems (dependents before their dependencies) ---------
 /subsystem=microprofile-jwt-smallrye:remove
 /subsystem=microprofile-config-smallrye:remove
